@@ -7,10 +7,7 @@ HttpRequest HttpParser::parse(const std::string& raw) {
     HttpRequest request;
     std::istringstream stream(raw);
 
-    // -------------------------
     // Read request line
-    // -------------------------
-
     std::string requestLine;
     std::getline(stream, requestLine);
     std::istringstream line(requestLine);
@@ -21,10 +18,7 @@ HttpRequest HttpParser::parse(const std::string& raw) {
 
     line >> method >> path >> version;
 
-    // -------------------------
     // Parse HTTP method
-    // -------------------------
-
     if (method == "GET") {
         request.method = HttpMethod::GET;
     }
@@ -52,24 +46,17 @@ HttpRequest HttpParser::parse(const std::string& raw) {
     request.path = path;
     request.version = version;
 
-    // -------------------------
     // Parse query parameters
-    // -------------------------
-
     request.query = parseQueryString(path);
 
     // Remove query string from stored path
-
     std::size_t questionMark = path.find('?');
 
     if (questionMark != std::string::npos) {
         request.path = path.substr(0, questionMark);
     }
 
-    // -------------------------
     // Read headers
-    // -------------------------
-
     std::string headerData;
     std::string currentLine;
 
@@ -90,10 +77,7 @@ HttpRequest HttpParser::parse(const std::string& raw) {
 
     request.headers = parseHeaders(headerData);
 
-    // -------------------------
     // Read body
-    // -------------------------
-
     std::string body;
 
     while (std::getline(stream, currentLine)) {

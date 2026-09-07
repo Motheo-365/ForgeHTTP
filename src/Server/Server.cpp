@@ -52,16 +52,30 @@ void Server::acceptConnections() {
 }
 
 void Server::handleConnection(Connection& c) {
-    std::string rawRequest = c.read();
+    try {
+        std::string rawRequest = c.read();
 
-    HttpRequest request = HttpParser::parse(rawRequest);
+        std::cout << "Received request:\n";
+        std::cout << rawRequest << '\n';
 
-    std::cout << "Received request:\n";
-    std::cout << rawRequest << '\n';
+        HttpRequest request = HttpParser::parse(rawRequest);
 
-    std::cout << "Parsed path: " << request.getPath() << '\n';
+        std::cout << "Received request:\n";
+        std::cout << rawRequest << '\n';
 
-    HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!\n");
+        std::cout << "Parsed path: " << request.getPath() << '\n';
 
-    c.write(response.toString());
+        HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!\n");
+
+        c.write(response.toString());
+    }
+
+    catch (const std::exception& e) {
+        std::cerr << "Request error: " << e.what() << '\n';
+        HttpResponse response = HttpResponse::text("Bad Request");
+        response.setSTatusCode(400);
+        c.write(response.toString());
+    }
+
+    c.close();
 }
