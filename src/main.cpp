@@ -13,9 +13,8 @@ void testHTTP();
 int main() {
     std::cout << "ForgeHTTP starting...\n";
 
-    testNetworking();
-    testHTTP();
-    testServer();
+   Server server;
+   server.start();
 
     return 0;
 }

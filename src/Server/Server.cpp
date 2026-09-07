@@ -61,7 +61,7 @@ void Server::handleConnection(Connection& c) {
 
     std::cout << "Parsed path: " << request.getPath() << '\n';
 
-    HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!");
+    HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!\n");
 
     c.write(response.toString());
 }
