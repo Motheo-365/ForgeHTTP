@@ -73,7 +73,7 @@ void Server::handleConnection(Connection& c) {
     catch (const std::exception& e) {
         std::cerr << "Request error: " << e.what() << '\n';
         HttpResponse response = HttpResponse::text("Bad Request");
-        response.setSTatusCode(400);
+        response.setStatusCode(400);
         c.write(response.toString());
     }
 
