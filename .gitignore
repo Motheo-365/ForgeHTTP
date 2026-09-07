@@ -1,10 +1,6 @@
 # CMake build directory
 build/
 
-# For production
-node_modules/
-.vscode/
-
 # CMake generated files
 CMakeCache.txt
 CMakeFiles/
@@ -19,6 +15,9 @@ install_manifest.txt
 # Object files
 *.o
 *.obj
+
+# Node.js dependencies
+node_modules/
 
 # IDE/editor files
 .vscode/
