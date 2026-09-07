@@ -64,6 +64,7 @@ std::string HttpResponse::toString() const {
 
     buffer << "\r\n";
     buffer << body;
+    buffer << "\r\n";
 
     return buffer.str();
 }

@@ -3,13 +3,24 @@
 
 using json = nlohmann::json;
 
+UserController::UserController() {
+    users.push_back({1, "Alice"});
+    users.push_back({2, "Bob"});
+
+    nextId = 3;
+}
+
 HttpResponse UserController::getUsers (const HttpRequest& req) {
-    return HttpResponse::json(
-        "["
-        "{\"id\":1,\"name\":\"Alice\"},"
-        "{\"id\":2,\"name\":\"Bob\"}"
-        "]"
-    );
+    json result = json::array();
+
+    for (const User& user: users) {
+        result.push_back({
+            {"id", user.id},
+            {"name", user.name}
+        });
+    }
+
+    return HttpResponse::json(result.dump());
 }
 
 HttpResponse UserController::createUser(const HttpRequest& req) {
@@ -25,11 +36,19 @@ HttpResponse UserController::createUser(const HttpRequest& req) {
             return response;
         }
 
-        HttpResponse response = HttpResponse::json(
-            "{\"id\":3,\"name\":\"" +
-            data["name"].get<std::string>() +
-            "\"}"
-        );
+        User user;
+        user.id = nextId++;
+        user.name = data["name"].get<std::string>();
+
+        users.push_back(user);
+
+        json result = {
+            {"id", user.id},
+            {"name", user.name}
+        };
+
+        HttpResponse response =
+            HttpResponse::json(result.dump());
 
         response.setStatusCode(201);
 
@@ -42,6 +61,7 @@ HttpResponse UserController::createUser(const HttpRequest& req) {
         );
 
         response.setStatusCode(400);
+
         return response;
     }
 }
