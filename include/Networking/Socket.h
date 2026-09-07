@@ -16,12 +16,21 @@ class Socket {
             Throw if creation fails.
         */
         Socket();
+        explicit Socket(int fd);
 
         /*
             Closes the underlying file descriptor if it is still open.
             This is the class' core RAII guarantee --- a Socket going out of scope must never leak a file descriptor.
         */
         ~Socket();
+
+        // Disable Copy operations (to prevent double-closing same file descriptor)
+        Socket(const Socket&) = delete;
+        Socket& operator=(const Socket&) = delete;
+
+        // Enable move operations
+        Socket(Socket&& other) noexcept;
+        Socket& operator=(Socket&& other) noexcept;
 
         /*
             binds the socket to the given port on all interfaces.
@@ -53,8 +62,7 @@ class Socket {
         void send(const string& data);
 
     private:
-        int fileDescriptor;
-        Socket(int fd);
+        int fileDescriptor = -1;
 };
 
 #endif

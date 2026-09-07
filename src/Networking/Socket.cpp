@@ -13,6 +13,26 @@ Socket::Socket() {
 
 Socket::Socket(int fd) : fileDescriptor(fd) {};
 
+// Move Constructor
+Socket::Socket(Socket&& other) noexcept : fileDescriptor(other.fileDescriptor) {
+    other.fileDescriptor = -1;
+}
+
+// Move Assignment Operator
+Socket& Socket::operator=(Socket&& other) noexcept {
+    if (this != &other) {
+        // Close current descriptor if open
+        if (fileDescriptor != -1) {
+            ::close(fileDescriptor);
+        }
+
+        // Steal resources from other
+        fileDescriptor = other.fileDescriptor;
+        other.fileDescriptor = -1;
+    }
+    return *this;
+}
+
 void Socket::bind(int port) {
     int opt = 1;
     struct sockaddr_in address;

@@ -4,30 +4,38 @@
 #include "Socket.h"
 
 // A thin, request-scoped handle around one accepted Socket.
-class Connection : public Socket {
+class Connection {
     public:
         /*
-            Takes ownership of an already-accepted Socket (composition --- the Connection owns this Socket for its lifetime)
+            Takes ownership of an already-accepted Socket
         */
-        Connection(Socket socket);
+        explicit Connection(Socket&& socket) noexcept;
+
+        // Disable copying (since Socket cannot be copied)
+        Connection(const Connection&) = delete;
+        Connection& operator=(const Connection&) = delete;
+
+        // Enable moving
+        Connection(Connection&&) noexcept = default;
+        Connection& operator=(Connection&&) noexcept = default;
 
         /*
-            Delegates the underlying Socket's receive() to pull the raw request bytes off the wire.
+            Delegates the underlying Socket's receive()
         */
-        string read();
+        std::string read();
 
         /*
-            Delegates to the underlying Socket's send() to write the raw response byte sback to the client.
+            Delegates to the underlying Socket's send()
         */
-        void write(const string& data);
+        void write(const std::string& data);
 
         /*
-            Explocitly closes the connection ahead of destruction, e.g. after a response had been fully sent and keep-alive is not in use.
+            Closes connection by resetting the underlying socket
         */
         void close();
 
     private:
-        Socket socket;
+        Socket socket; // Composition
 };
 
 #endif

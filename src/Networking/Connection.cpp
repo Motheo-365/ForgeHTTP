@@ -1,5 +1,17 @@
 #include "Networking/Connection.h"
+#include <utility>
 
-Connection::Connection (Socket socket) {
-    
+Connection::Connection(Socket&& other) noexcept : socket(std::move(other)) {}
+
+std::string Connection::read() {
+    return socket.receive();
+}
+
+void Connection::write(const std::string& data) {
+    socket.send(data);
+}
+
+void Connection::close() {
+    // Re-assigning an empty Socket closes the old file descriptor via ~Socket()
+    socket = Socket(); 
 }
