@@ -1,30 +1,33 @@
 #include "Networking/Socket.h"
 #include "HTTP/HttpParser.h"
 #include "HTTP/HttpResponse.h"
+#include "Server/Server.h"
 
 #include <iostream>
 #include <exception>
 
+void testNetworking();
 void testServer();
 void testHTTP();
 
 int main() {
     std::cout << "ForgeHTTP starting...\n";
 
+    // testNetworking();
+    // testHTTP();
     testServer();
-    testHTTP();
 
     return 0;
 }
 
-void testServer() {
+void testNetworking() {
     std::cout << "\n--- Socket Server Test ---\n";
 
     try {
         Socket server;
         std::cout << "Socket created successfully\n";
-        server.bind(8080);
-        std::cout << "Socket bound to port 8080\n";
+        server.bind(8085);
+        std::cout << "Socket bound to port 8085\n";
         server.listen(10);
         std::cout << "Socket is listening\n";
     }
@@ -41,7 +44,7 @@ void testHTTP() {
     try {
         std::string rawRequest =
             "GET /users?id=10 HTTP/1.1\r\n"
-            "Host: localhost:8080\r\n"
+            "Host: localhost:8085\r\n"
             "Accept: application/json\r\n"
             "\r\n";
 
@@ -82,5 +85,21 @@ void testHTTP() {
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';
         return;
+    }
+}
+
+void testServer() {
+    std::cout << "\n--- Server Test ---\n";
+
+    try {
+        Server server;
+
+        std::cout << "Starting ForgeHTTP server...\n";
+
+        server.start(8085);
+    }
+
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
     }
 }

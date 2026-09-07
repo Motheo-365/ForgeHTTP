@@ -33,7 +33,7 @@ Use this document for the *why* and the *order*; use the two companions above fo
 By the end of this project, running:
 
 ```bash
-./forge --port 8080
+./forge --port 8085
 ```
 
 starts a concurrent HTTP server that:
@@ -252,7 +252,7 @@ Designed in from day one, not retrofitted:
 
 ```cpp
 const char* port = std::getenv("PORT");
-// fall back to 8080 if unset
+// fall back to 8085 if unset
 ```
 
 ---
@@ -283,6 +283,6 @@ Start Milestone 1:
 1. Set up the repo skeleton and `CMakeLists.txt`
 2. Write a minimal `Socket` class (RAII wrapper)
 3. Write a minimal `Server` that accepts one connection and writes back a static string
-4. Confirm it responds to a real browser request on `localhost:8080`
+4. Confirm it responds to a real browser request on `localhost:8085`
 
 Only once that's solid do we move to HTTP parsing (Milestone 2).

@@ -1,13 +1,18 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "Socket.h"
+#include "Networking/Socket.h"
+#include "Networking/Connection.h"
+#include "Concurrency/ThreadPool.h"
+#include <utility>
 
 // Owns the full request lifecycle: listens, dispatches work, and shuts down cleanly.
 //
 // Top-level orchestrator. Knows about every other layer, but no layer below it knows about Server.
 class Server {
     public:
+        Server();
+
         /*
             Binds and listens on the given port (falling back to the PORT environment variable when no port is passed), then enters the accept loop.
             Prints a short startup banner.
@@ -22,9 +27,9 @@ class Server {
     private:
         Socket listenSocket;
         ThreadPool pool;
-        Router router;
-        Middleware* middlewareChain;
-        ServerEventPublisher events;
+        // Router router;
+        // Middleware* middlewareChain;
+        // ServerEventPublisher events;
         bool running = false;
         
         /*
@@ -36,7 +41,7 @@ class Server {
             Runs on a worker thread. Reads the raw request, parses it via HttpParser, runs it through the middleware chain, finds a matching Route via the Router, invokes its handler, and writes the resulting HttpResponse back through the Connection.
             Publishes RequestReceived/ResponseSent events along the way.
         */
-        void handleConnection(Connection& c);
+        void handleConnection(Connection& conn);
 }; 
 
 #endif

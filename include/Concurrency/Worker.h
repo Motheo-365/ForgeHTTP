@@ -2,6 +2,7 @@
 #define WORKER_H
 
 #include "TaskQueue.h"
+#include <thread>
 
 // A single thread that repeatedly pulls from the share TaskQueue and executes tasks.
 class Worker {
@@ -15,10 +16,13 @@ class Worker {
             The thread's main loop: repeatedly calls queue.pop() and executes the returned task, until told to stop.
         */
         void run();
+        void start();
+        void join();
 
     private:
         int id;
         std::thread thread;
+        TaskQueue& q;
 };
 
 #endif

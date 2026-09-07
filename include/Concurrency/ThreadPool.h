@@ -1,7 +1,12 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
-#include <function>
+#include "Worker.h"
+#include "TaskQueue.h"
+
+#include <atomic>
+#include <functional>
+#include <vector>
 
 // owns a fixed set of Worker threads and the shared TaskQueue they pull from.
 class ThreadPool {
@@ -22,9 +27,9 @@ class ThreadPool {
         void shutdown();
 
     private:
-        vector<Worker> workers;
+        std::vector<Worker> workers;
         TaskQueue queue;
-        atomic<bool> stopping;
+        std::atomic<bool> stopping;
 };
 
 #endif

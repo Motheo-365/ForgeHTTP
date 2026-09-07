@@ -26,10 +26,14 @@ class TaskQueue {
         */
         bool empty();
 
+        // Wake workersup  when done accpting work.
+        void shutdown();
+
     private:
         std::deque<std::function<void()>> tasks;
         std::mutex mtx;
         std::condition_variable cv;
+        bool stopping = false;
 };
 
 #endif

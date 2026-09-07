@@ -1,7 +1,15 @@
-# include "Server/Server.h"
-#include <sstream>
+#include "Server/Server.h"
+
+#include "HTTP/HttpParser.h"
+#include "HTTP/HttpResponse.h"
+#include "HTTP/HttpRequest.h"
+#include "Networking/Connection.h"
+
 #include <cstdlib>
 #include <iostream>
+#include <memory>
+
+Server::Server() : pool(8) {}
 
 void Server::start(int port) {
     if (port == 0) {
@@ -11,35 +19,51 @@ void Server::start(int port) {
             port = std::stoi(environmentPort);
         }
         else {
-            port = 8080;
+            port = 8085;
         }
     }
 
-    listenSocket.bind(port); // Bind the socket
-    listenSocket.listen(10); // Listening socket can queue up to roughly 10 pending connections while the server is busyy accepting/processing them.
+    listenSocket.bind(port);
+    listenSocket.listen(10);
     running = true;
 
-    // Startup banner
     std::cout << "ForgeHTTP\n";
     std::cout << "----------------------------------------\n";
     std::cout << "Server running on port " << port << '\n';
     std::cout << "Workers: 8\n";
 
-    acceptConnections(); // Start accepting connections
+    acceptConnections();
 }
 
 void Server::stop() {
     running = false;
-    // pool.shutdown() when implemented.
 }
 
 void Server::acceptConnections() {
     while (running) {
         Socket client = listenSocket.accept();
 
-        // ThreadPool handling will be added later
+        auto connection = std::make_shared<Connection>(std::move(client));
+
+        pool.enqueue(
+            [this, connection]() {
+                handleConnection(*connection);
+            }
+        );
     }
 }
 
-void Server::handleConnection(Connection& conn) {
+void Server::handleConnection(Connection& c) {
+    std::string rawRequest = c.read();
+
+    HttpRequest request = HttpParser::parse(rawRequest);
+
+    std::cout << "Received request:\n";
+    std::cout << rawRequest << '\n';
+
+    std::cout << "Parsed path: " << request.getPath() << '\n';
+
+    HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!");
+
+    c.write(response.toString());
 }

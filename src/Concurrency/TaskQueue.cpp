@@ -14,8 +14,10 @@ std::function<void()> TaskQueue::pop()  {
     
     // Wait until queue is not empty
     cv.wait(lock,
-        [this]() { return !tasks.empty(); }
+        [this]() { return !tasks.empty() || stopping; }
     );
+
+    if (tasks.empty()) return nullptr;
 
     // Retrieve item
     std::function<void()> task = tasks.front();
@@ -27,4 +29,10 @@ std::function<void()> TaskQueue::pop()  {
 bool TaskQueue::empty() {
     std::unique_lock<std::mutex> lock(mtx);
     return tasks.empty();
+}
+
+void TaskQueue::shutdown() {
+    std::unique_lock<std::mutex> lock(mtx);
+    stopping = true;
+    cv.notify_all();
 }
