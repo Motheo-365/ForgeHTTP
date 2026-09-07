@@ -34,3 +34,22 @@ std::string HttpRequest::getHeader(const std::string& key) const {
 
     return "";
 }
+
+std::string HttpRequest::getQueryParam(const std::string& key) const {
+    // Search query map for requested parameter
+    auto it = query.find(key);
+
+    if (it != query.end()) { // If it exists, return its value
+        return it->second;
+    }
+
+    return "";
+}
+
+std::string HttpRequest::getPath() const {
+    return path;
+}
+
+std::string HttpRequest::getVersion() const {
+    return version;
+}

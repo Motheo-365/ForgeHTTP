@@ -19,8 +19,13 @@ class HttpRequest {
             Returns the value of the named query parameter, or an empty std::string if absent.
         */
         std::string getQueryParam(const std::string& key) const;
+        
+        std::string getPath() const;
+        std::string getVersion() const;
 
-    private:
+private:
+        friend class HttpParser;
+        
         /*
             Populated by HttpParser from the request line, e.g. GET /users?id=10 HTTP/1.1 becomes method=GET, path=/users, version=HTTP/1.1
         */
