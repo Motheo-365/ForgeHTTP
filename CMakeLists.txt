@@ -14,10 +14,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for tooling
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# main executable
-add_executable(forge
-    src/main.cpp
+file(GLOB_RECURSE SOURCES
+    "${PROJECT_SOURCE_DIR}/src/*.cpp"
 )
+
+# main executable
+add_executable(forge ${SOURCES})
 
 # Project Headers
 target_include_directories(forge
@@ -33,5 +35,13 @@ else()
         -Wall
         -Wextra
         -Wpedantic
+
+        # Sanitizers
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer
+    )
+
+    target_link_options(forge PRIVATE
+        -fsanitize=address,undefined
     )
 endif()

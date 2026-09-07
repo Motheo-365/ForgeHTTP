@@ -1,6 +1,9 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include <sys/socket.h>
+#include <stdexcept>
+
 #include <iostream>
 #include <string>
 using namespace std;
@@ -16,7 +19,7 @@ class Socket {
 
         /*
             Closes the underlying file descriptor if it is still open.
-            This is the class' core RAII guarantee --- a Socket going out of scpe must never leak a file descriptor.
+            This is the class' core RAII guarantee --- a Socket going out of scope must never leak a file descriptor.
         */
         ~Socket();
 
@@ -39,7 +42,7 @@ class Socket {
 
         /*
             reads available bytes to the socket.
-            Loops on send() to handle writes, since a single call is not guaranteed to send the whole buffer.
+            Loops on recv() to handle writes, since a single call is not guaranteed to send the whole buffer.
         */
         string receive();
 
@@ -51,6 +54,7 @@ class Socket {
 
     private:
         int fileDescriptor;
+        Socket(int fd);
 };
 
 #endif
