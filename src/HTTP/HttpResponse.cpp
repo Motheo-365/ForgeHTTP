@@ -36,7 +36,11 @@ std::string HttpResponse::toString() const {
     std::ostringstream buffer;
     std::string statusMessage = "OK";
 
-    if (statusCode == 400) {
+    if (statusCode == 201) {
+            statusMessage = "Created";
+    }
+    
+    else if (statusCode == 400) {
         statusMessage = "Bad Request";
     }
 

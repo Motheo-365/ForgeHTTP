@@ -76,7 +76,7 @@ void testHTTP() {
 
         std::cout << "\n--- Text Response Test ---\n";
 
-        HttpResponse textResponse = HttpResponse::text("Hello from ForgeHTTP");
+        HttpResponse textResponse = HttpResponse::text("Hello from ForgeHTTP\n");
 
         // NOT FOUND
         HttpResponse notFound = HttpResponse::text("Page not found");
