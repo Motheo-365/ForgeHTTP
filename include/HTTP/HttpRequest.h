@@ -22,6 +22,7 @@ class HttpRequest {
         std::string getPath() const;
         HttpMethod getMethod() const;
         std::string getVersion() const;
+        std::string getBody() const;
 
 private:
         friend class HttpParser;

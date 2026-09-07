@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "HTTP/HttpMethod.h"
+#include "HTTP/HttpRequest.h"
+#include "HTTP/HttpResponse.h"
 
 using Handler = std::function<HttpResponse(HttpRequest&)>;
 
@@ -26,6 +28,7 @@ class Route {
         std::map<std::string, std::string> extractParams(const std::string& path) const;
 
         HttpMethod getMethod() const;
+        Handler getHandler() const;
         
     private:
         HttpMethod method;

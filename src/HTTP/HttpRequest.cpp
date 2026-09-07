@@ -50,10 +50,14 @@ std::string HttpRequest::getPath() const {
     return path;
 }
 
-HttpMethod getMethod() const {
+HttpMethod HttpRequest::getMethod() const {
     return method;
 }
 
 std::string HttpRequest::getVersion() const {
     return version;
+}
+
+std::string HttpRequest::getBody() const {
+    return body;
 }

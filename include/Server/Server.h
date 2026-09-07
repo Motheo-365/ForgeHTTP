@@ -4,6 +4,10 @@
 #include "Networking/Socket.h"
 #include "Networking/Connection.h"
 #include "Concurrency/ThreadPool.h"
+#include "Routing/Router.h"
+#include "Controllers/HealthController.h"
+#include "Controllers/UserController.h"
+
 #include <utility>
 
 // Owns the full request lifecycle: listens, dispatches work, and shuts down cleanly.
@@ -27,9 +31,13 @@ class Server {
     private:
         Socket listenSocket;
         ThreadPool pool;
-        // Router router;
+
+        Router router;
+        HealthController healthController;
+        UserController userController;
         // Middleware* middlewareChain;
         // ServerEventPublisher events;
+
         bool running = false;
         
         /*

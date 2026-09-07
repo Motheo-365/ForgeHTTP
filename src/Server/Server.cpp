@@ -9,7 +9,19 @@
 #include <iostream>
 #include <memory>
 
-Server::Server() : pool(8) {}
+Server::Server() : pool(8){
+    router.get("/health", [this](const HttpRequest& req) {
+        return healthController.getHealth(req);
+    });
+
+    router.get("/api/users", [this](const HttpRequest& req) {
+        return userController.getUsers(req);
+    });
+
+    router.post("/api/users", [this](const HttpRequest& req) {
+        return userController.createUser(req);
+    });
+}
 
 void Server::start(int port) {
     if (port == 0) {
@@ -60,20 +72,39 @@ void Server::handleConnection(Connection& c) {
 
         HttpRequest request = HttpParser::parse(rawRequest);
 
-        std::cout << "Received request:\n";
-        std::cout << rawRequest << '\n';
+        std::cout << "Parsed path: "
+                  << request.getPath()
+                  << '\n';
 
-        std::cout << "Parsed path: " << request.getPath() << '\n';
+        Route* route = router.match(request);
 
-        HttpResponse response = HttpResponse::text("Hello from ForgeHTTP!\n");
+        if (route == nullptr) {
+            HttpResponse response =
+                HttpResponse::text("Route not found");
+
+            response.setStatusCode(404);
+
+            c.write(response.toString());
+            c.close();
+            return;
+        }
+
+        HttpResponse response =
+            route->getHandler()(request);
 
         c.write(response.toString());
     }
 
     catch (const std::exception& e) {
-        std::cerr << "Request error: " << e.what() << '\n';
-        HttpResponse response = HttpResponse::text("Bad Request");
+        std::cerr << "Request error: "
+                  << e.what()
+                  << '\n';
+
+        HttpResponse response =
+            HttpResponse::text("Bad Request");
+
         response.setStatusCode(400);
+
         c.write(response.toString());
     }
 

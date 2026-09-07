@@ -55,3 +55,7 @@ Route::extractParams(const std::string& path) const {
 HttpMethod Route::getMethod() const {
     return method;
 }
+
+Handler Route::getHandler() const {
+    return handler;
+}
