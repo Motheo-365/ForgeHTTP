@@ -20,6 +20,7 @@ class HttpRequest {
         std::string getQueryParam(const std::string& key) const;
         
         std::string getPath() const;
+        HttpMethod getMethod() const;
         std::string getVersion() const;
 
 private:

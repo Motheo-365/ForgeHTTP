@@ -1,7 +1,12 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#include "HTTP/HttpRequest.h"
+#include "Route.h"
+
 #include <vector>
+#include <string>
+#include <functional>
 
 // Holds every registered Route and finds the one that matches an incoming request.
 class Router{
@@ -9,23 +14,23 @@ class Router{
         /*
             Registers a GET route gor the given path pattern.
         */
-        void get(const string& path, Handler handler);
+        void get(const std::string& path, Handler handler);
 
         /*
             Registers a POST route for the given path pattern
         */
-        void post(const string& path, Handler handler);
+        void post(const std::string& path, Handler handler);
 
         /*
             Registers a PUT route for the given path pattern
         */
-        void put(const string& path, Handler handler);
+        void put(const std::string& path, Handler handler);
 
         /*
             Registers a DELETE route for the given path pattern/
             Name del rather than delete because delete is a keyword.
         */
-        void del(const string& push, Handler handler);
+        void del(const std::string& path, Handler handler);
 
         /*
             Scans the registered routes for one whose method and pattern match teh request, returning a pointer to it (or nullptr if none match, which should produce a 404 response upstream)
@@ -33,7 +38,7 @@ class Router{
         Route* match(const HttpRequest& request);
 
     private:
-        vector<Route> routes;
+        std::vector<Route> routes;
 };
 
 #endif
