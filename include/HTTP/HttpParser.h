@@ -22,12 +22,12 @@ class HttpParser {
         /*
             Splits the header block into a map, one entry per Key: Value line.
         */
-        static map<std::string, std::string> parseHeaders(const std::string& raw);
+        static std::map<std::string, std::string> parseHeaders(const std::string& raw);
 
         /*
             Splits everything after ? in the path into key/value pairs, and return the map (the caller strips the query std::string from the stored path.)
         */
-        static map<std::string, std::string> parseQueryString(const std::string& path);
+        static std::map<std::string, std::string> parseQueryString(const std::string& path);
 };
 
 #endif

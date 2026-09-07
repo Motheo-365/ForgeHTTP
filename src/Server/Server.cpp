@@ -27,10 +27,8 @@ void Server::start(int port) {
     listenSocket.listen(10);
     running = true;
 
-    std::cout << "ForgeHTTP\n";
-    std::cout << "----------------------------------------\n";
-    std::cout << "Server running on port " << port << '\n';
-    std::cout << "Workers: 8\n";
+    std::cout << "\nServer running on port " << port << '\n';
+    std::cout << "Workers: 8\n\n";
 
     acceptConnections();
 }

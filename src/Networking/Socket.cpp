@@ -7,7 +7,7 @@ Socket::Socket() {
     fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 
     if (fileDescriptor == -1) {
-        throw runtime_error("Failed to create socket");
+        throw std::runtime_error("Failed to create socket");
     }
 }
 
@@ -43,13 +43,13 @@ void Socket::bind(int port) {
 
     // bind
     if (::bind(fileDescriptor, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        throw runtime_error("bind failed");
+        throw std::runtime_error("bind failed");
     }
 }
 
 void Socket::listen(int backlog) {
     if (::listen(fileDescriptor, backlog) < 0) {
-        throw runtime_error("listen failed");
+        throw std::runtime_error("listen failed");
     }
 }
 
@@ -57,15 +57,15 @@ Socket Socket::accept() {
     int clientSocket = ::accept(fileDescriptor, nullptr, nullptr);
 
     if (clientSocket < 0) {
-        throw runtime_error("accept failed");
+        throw std::runtime_error("accept failed");
     }
 
     return Socket(clientSocket);
 }
 
-string Socket::receive() {
+std::string Socket::receive() {
     char buffer[1024] = { 0 };
-    string message;
+    std::string message;
     ssize_t bytesRead;
 
     while ((bytesRead = recv(fileDescriptor, buffer, sizeof(buffer), 0)) > 0) {
@@ -75,7 +75,7 @@ string Socket::receive() {
     }
 
     if (bytesRead < 0) {
-        throw runtime_error("receive failed");
+        throw std::runtime_error("receive failed");
     }
 
     return message;

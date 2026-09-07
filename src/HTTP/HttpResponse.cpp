@@ -6,7 +6,7 @@ HttpResponse HttpResponse::json(const std::string& data) {
 
     response.statusCode = 200;
     response.headers["Content-Type"] = "application/json";
-    response.headers["Content-Length"] = to_string(data.size());
+    response.headers["Content-Length"] = std::to_string(data.size());
     response.body = data;
 
     return response;
@@ -17,7 +17,7 @@ HttpResponse HttpResponse::text(const std::string& data) {
 
     response.statusCode = 200;
     response.headers["Content-Type"] = "text/plain";
-    response.headers["Content-Length"] = to_string(data.size());
+    response.headers["Content-Length"] = std::to_string(data.size());
     response.body = data;
 
     return response;
@@ -27,17 +27,39 @@ void HttpResponse::setHeader(const std::string& key, const std::string& value) {
     headers[key] = value;
 }
 
+void HttpResponse::setStatusCode(int code) {
+    statusCode = code;
+}
+
+
 std::string HttpResponse::toString() const {
     std::ostringstream buffer;
+    std::string statusMessage = "OK";
 
-   buffer << "HTTP/1.1 " << statusCode << " OK\r\n";
+    if (statusCode == 400) {
+        statusMessage = "Bad Request";
+    }
 
-   for (const auto& header: headers) {
-    buffer << header.first << ": " << header.second << "\r\n";
-   }
+    else if (statusCode == 404) {
+        statusMessage = "Not Found";
+    }
 
-   buffer << "\r\n";
-   buffer << body;
+    else if (statusCode == 500) {
+        statusMessage = "Internal Server Error";
+    }
+
+    buffer << "HTTP/1.1 "
+           << statusCode
+           << " "
+           << statusMessage
+           << "\r\n";
+
+    for (const auto& header : headers) {
+        buffer << header.first << ": " << header.second << "\r\n";
+    }
+
+    buffer << "\r\n";
+    buffer << body;
 
     return buffer.str();
 }

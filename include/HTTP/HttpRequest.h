@@ -5,7 +5,6 @@
 #include <string>
 
 #include "HttpMethod.h"
-using namespace std;
 
 // A parsed, structure representation of an incoming HTTP request.
 class HttpRequest {

@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-using namespace std;
 
 // A structured HTTP response, convertible to raw wire bytes
 //
@@ -25,6 +24,8 @@ class HttpResponse {
        // Sets or overwrites a single response header
        void setHeader(const std::string& key, const std::string& value);
 
+       // Sets or overwrites a single reponse header.
+       void setStatusCode(int code);
        /*
         Serializes the full response (status line, headers, blank line, body) into the exact bytes to write t the socket.
 
@@ -39,7 +40,7 @@ class HttpResponse {
 
     private:
         int statusCode;
-        map<std::string, std::string> headers;
+        std::map<std::string, std::string> headers;
         std::string body;
 };
 

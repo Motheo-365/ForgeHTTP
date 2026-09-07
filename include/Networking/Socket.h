@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <string>
-using namespace std;
 
 // RAII wrapper around a POSIX file descriptor
 class Socket {
@@ -53,13 +52,13 @@ class Socket {
             reads available bytes to the socket.
             Loops on recv() to handle writes, since a single call is not guaranteed to send the whole buffer.
         */
-        string receive();
+        std::string receive();
 
         /*
             Writes the given bytes to the socket.
             Loops on send() to handle partial writes, since single call is not guaranteed to send the whole buffer.
         */
-        void send(const string& data);
+        void send(const std::string& data);
 
     private:
         int fileDescriptor = -1;

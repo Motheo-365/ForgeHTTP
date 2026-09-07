@@ -13,8 +13,8 @@ void testHTTP();
 int main() {
     std::cout << "ForgeHTTP starting...\n";
 
-    // testNetworking();
-    // testHTTP();
+    testNetworking();
+    testHTTP();
     testServer();
 
     return 0;
@@ -79,6 +79,13 @@ void testHTTP() {
 
         HttpResponse textResponse = HttpResponse::text("Hello from ForgeHTTP");
 
+        // NOT FOUND
+        HttpResponse notFound = HttpResponse::text("Page not found");
+        notFound.setStatusCode(404);
+
+        std::cout << "\n--- 404 Response Test ---\n";
+        std::cout << notFound.toString() << '\n';
+
         std::cout << textResponse.toString() << '\n';
     }
 
@@ -93,9 +100,7 @@ void testServer() {
 
     try {
         Server server;
-
         std::cout << "Starting ForgeHTTP server...\n";
-
         server.start(8085);
     }
 
