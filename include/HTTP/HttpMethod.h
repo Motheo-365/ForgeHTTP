@@ -1,5 +1,5 @@
 #ifndef HTTPMETHOD_H
-#define HTTPMETHO_H
+#define HTTPMETHOD_H
 
 // ENUM of supported verbs
 enum class HttpMethod {
