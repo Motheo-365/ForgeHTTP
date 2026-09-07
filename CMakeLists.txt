@@ -35,13 +35,12 @@ else()
         -Wall
         -Wextra
         -Wpedantic
-
-        # Sanitizers
-        -fsanitize=address,undefined
-        -fno-omit-frame-pointer
+        # # Sanitizers
+        # -fsanitize=address,undefined
+        # -fno-omit-frame-pointer
     )
 
-    target_link_options(forge PRIVATE
-        -fsanitize=address,undefined
-    )
+    # target_link_options(forge PRIVATE
+    #     -fsanitize=address,undefined
+    # )
 endif()

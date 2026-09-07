@@ -101,7 +101,7 @@ void testServer() {
     try {
         Server server;
         std::cout << "Starting ForgeHTTP server...\n";
-        server.start(8085);
+        server.start();
     }
 
     catch (const std::exception& e) {
