@@ -67,8 +67,8 @@ void Server::handleConnection(Connection& c) {
     try {
         std::string rawRequest = c.read();
 
-        std::cout << "Received request:\n";
-        std::cout << rawRequest << '\n';
+        // std::cout << "Received request:\n";
+        // std::cout << rawRequest << '\n';
 
         HttpRequest request = HttpParser::parse(rawRequest);
 
