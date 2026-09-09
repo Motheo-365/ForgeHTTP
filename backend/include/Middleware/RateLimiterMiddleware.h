@@ -6,7 +6,7 @@
 // Caps how many requests a client can make in a given window.
 class RateLimiterMiddleware : public Middleware {
     public:
-        void handle(HttpRequest& req, HttpResponse& res, std::function next) override;
+    void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
 };
 
 #endif

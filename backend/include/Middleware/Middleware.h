@@ -1,10 +1,14 @@
 #ifndef MIDDLEWARE_H
 #define MIDDLEWARE_H
 
+#include "HTTP/HttpResponse.h"
+#include "HTTP/HttpRequest.h"
+#include <functional>
+
 // Abstract base class for every middleware link in the chain.
 class Middleware{
     public:
-        void handle(HttpRequest& req, HttpResponse& res, std::function next) = 0;
+        virtual void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) = 0;
         Middleware* setNext(Middleware* m);
 
     private:

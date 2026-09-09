@@ -6,7 +6,7 @@
 // Logs every request/response pair with method, path, status, and timing
 class LoggerMiddleware : public Middleware {
     public:
-        void handle(HttpRequest& req, HttpResponse& res, std::function next) override;
+    void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
 };
 
 #endif

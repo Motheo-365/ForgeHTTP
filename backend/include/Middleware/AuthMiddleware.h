@@ -6,7 +6,7 @@
 // Rejects requests that dont carry valid credentials, before they reach the router.
 class AuthMiddleware : public Middleware {
     public:
-        void handle(HttpRequest& req, HttpResponse& res, std::function next) override;
+        void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
 };
 
 #endif
