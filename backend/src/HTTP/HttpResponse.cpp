@@ -1,6 +1,8 @@
 #include "HTTP/HttpResponse.h"
 #include <sstream>
 
+int getStatusCode();
+
 HttpResponse HttpResponse::json(const std::string& data) {
     HttpResponse response;
 
@@ -67,4 +69,8 @@ std::string HttpResponse::toString() const {
     buffer << "\r\n";
 
     return buffer.str();
+}
+
+int HttpResponse::getStatusCode() {
+    return statusCode;
 }

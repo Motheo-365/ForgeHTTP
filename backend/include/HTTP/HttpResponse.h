@@ -38,6 +38,8 @@ class HttpResponse {
        */
        std::string toString() const;
 
+       int getStatusCode();
+
     private:
         int statusCode;
         std::map<std::string, std::string> headers;
