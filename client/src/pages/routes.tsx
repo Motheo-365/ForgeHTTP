@@ -1,10 +1,149 @@
-function Routes() {
+import "../styles/routes.css";
+
+function RoutesPage() {
+    const routes = [
+        {
+            method: "GET",
+            path: "/health",
+            handler: "HealthController",
+            access: "PUBLIC"
+        },
+        {
+            method: "GET",
+            path: "/api/users",
+            handler: "UserController",
+            access: "PROTECTED"
+        },
+        {
+            method: "POST",
+            path: "/api/users",
+            handler: "UserController",
+            access: "PROTECTED"
+        },
+        {
+            method: "GET",
+            path: "/api/requests",
+            handler: "RequestHistory",
+            access: "PROTECTED"
+        },
+        {
+            method: "GET",
+            path: "/metrics",
+            handler: "MetricsConnector",
+            access: "PUBLIC"
+        }
+    ];
+
+    const publicRoutes = routes.filter(
+        (route) => route.access === "PUBLIC"
+    ).length;
+
+    const protectedRoutes = routes.filter(
+        (route) => route.access === "PROTECTED"
+    ).length;
+
     return (
-        <div>
-            <h1>ForgeHTTP</h1>
-            <p>Routes</p>
-        </div>
+        <main className="routes-page">
+            <header className="routes-page-header">
+                <div>
+                    <span className="page-label">
+                        ROUTING
+                    </span>
+
+                    <h1>Routes</h1>
+
+                    <p>
+                        Registered HTTP endpoints exposed by ForgeHTTP.
+                    </p>
+                </div>
+            </header>
+
+            <section className="routes-overview">
+                <div className="route-stat">
+                    <span className="route-stat-label">
+                        TOTAL ROUTES
+                    </span>
+
+                    <strong>{routes.length}</strong>
+                </div>
+
+                <div className="route-stat route-stat-success">
+                    <span className="route-stat-label">
+                        PUBLIC
+                    </span>
+
+                    <strong>{publicRoutes}</strong>
+                </div>
+
+                <div className="route-stat route-stat-protected">
+                    <span className="route-stat-label">
+                        PROTECTED
+                    </span>
+
+                    <strong>{protectedRoutes}</strong>
+                </div>
+            </section>
+
+            <section className="routes-table-section">
+                <div className="routes-section-header">
+                    <div>
+                        <span className="page-label">
+                            ROUTE REGISTRY
+                        </span>
+
+                        <h2>Registered endpoints</h2>
+                    </div>
+                </div>
+
+                <div className="routes-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>METHOD</th>
+                                <th>PATH</th>
+                                <th>HANDLER</th>
+                                <th>ACCESS</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {routes.map((route, index) => (
+                                <tr key={index}>
+                                    <td>
+                                        <span
+                                            className={`route-method route-method-${route.method.toLowerCase()}`}
+                                        >
+                                            {route.method}
+                                        </span>
+                                    </td>
+
+                                    <td className="route-path">
+                                        {route.path}
+                                    </td>
+
+                                    <td>
+                                        {route.handler}
+                                    </td>
+
+                                    <td>
+                                        <span
+                                            className={
+                                                route.access === "PUBLIC"
+                                                    ? "route-access-public"
+                                                    : "route-access-protected"
+                                            }
+                                        >
+                                            {route.access}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     );
 }
 
-export default Routes;
+export default RoutesPage;
