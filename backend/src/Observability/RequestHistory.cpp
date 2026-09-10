@@ -6,13 +6,6 @@
 
 namespace {
 
-bool isDashboardRequest(const ServerEvent &event) {
-    return event.method == "OPTIONS" ||
-           event.path == "/health" ||
-           event.path == "/metrics" ||
-           event.path == "/api/requests";
-}
-
 }
 
 RequestHistory::RequestHistory(std::size_t maxEntries)
@@ -24,7 +17,7 @@ void RequestHistory::onEvent(const ServerEvent &event) {
         return;
     }
 
-    if (isDashboardRequest(event)) {
+    if (event.internal) {
         return;
     }
 

@@ -4,19 +4,12 @@
 
 namespace {
 
-bool isDashboardRequest(const ServerEvent &event) {
-    return event.method == "OPTIONS" ||
-           event.path == "/health" ||
-           event.path == "/metrics" ||
-           event.path == "/api/requests";
-}
-
 }
 
 MetricsConnector::MetricsConnector(int workers) : workers(workers) {}
 
 void MetricsConnector::onEvent(const ServerEvent& event) {
-    if (isDashboardRequest(event)) {
+    if (event.internal) {
         return;
     }
 

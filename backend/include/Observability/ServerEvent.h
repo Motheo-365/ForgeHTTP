@@ -22,6 +22,8 @@ struct ServerEvent {
     int statusCode = 0;
 
     double durationMs = 0.0;
+
+    bool internal = false;
 };
 
 #endif

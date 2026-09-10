@@ -158,12 +158,18 @@ void Server::handleConnection(Connection& c) {
         // std::cout << rawRequest << '\n';
 
         HttpRequest request = HttpParser::parse(rawRequest);
+        const bool internalRequest =
+            request.getMethod() == HttpMethod::OPTIONS ||
+            request.getHeader("X-ForgeHTTP-Internal") == "true";
 
         events.publish({
             ServerEventType::RequestReceived,
             std::chrono::system_clock::now(),
             methodName(request.getMethod()),
-            request.getPath()
+            request.getPath(),
+            0,
+            0.0,
+            internalRequest
         });
 
         std::cout << "Parsed path: "
@@ -206,7 +212,8 @@ void Server::handleConnection(Connection& c) {
             methodName(request.getMethod()),
             request.getPath(),
             response.getStatusCode(),
-            elapsed
+            elapsed,
+            internalRequest
         });
     }
 
