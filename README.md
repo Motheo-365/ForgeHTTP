@@ -450,7 +450,7 @@ The backend builds and runs with concurrent request handling, routing, middlewar
 
 **Motheo Morena**
 
-Aspiring Software Developer
+Software Developer
 
 GitHub: [Motheo-365](https://github.com/Motheo-365)
 
