@@ -184,6 +184,34 @@
 }
 
 /* ---------------------------------
+   Request Stat States
+--------------------------------- */
+
+.request-stat-success {
+    border-color: var(--accent-border);
+}
+
+.request-stat-success strong {
+    color: var(--success);
+}
+
+.request-stat-warning {
+    border-color: rgba(214, 200, 90, 0.25);
+}
+
+.request-stat-warning strong {
+    color: var(--warning);
+}
+
+.request-stat-error {
+    border-color: rgba(255, 92, 92, 0.25);
+}
+
+.request-stat-error strong {
+    color: var(--error);
+}
+
+/* ---------------------------------
    Responsive
 --------------------------------- */
 

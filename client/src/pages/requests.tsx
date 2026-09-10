@@ -49,7 +49,7 @@ function Requests() {
                     <strong>{totalRequests}</strong>
                 </div>
 
-                <div className="request-stat">
+                <div className="request-stat request-stat-success">
                     <span className="request-stat-label">
                         SUCCESSFUL
                     </span>
@@ -57,7 +57,7 @@ function Requests() {
                     <strong>{successfulRequests}</strong>
                 </div>
 
-                <div className="request-stat">
+                <div className="request-stat reques-stat-warning">
                     <span className="request-stat-label">
                         CLIENT ERRORS
                     </span>
@@ -65,7 +65,7 @@ function Requests() {
                     <strong>{clientErrors}</strong>
                 </div>
 
-                <div className="request-stat">
+                <div className="request-stat request-stat-error">
                     <span className="request-stat-label">
                         SERVER ERRORS
                     </span>
