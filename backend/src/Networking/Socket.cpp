@@ -71,7 +71,7 @@ std::string Socket::receive() {
     while ((bytesRead = recv(fileDescriptor, buffer, sizeof(buffer), 0)) > 0) {
         message.append(buffer, bytesRead);
 
-        if (bytesRead < sizeof(buffer)) break;
+        if (bytesRead < static_cast<ssize_t>(sizeof buffer)) break;
     }
 
     if (bytesRead < 0) {

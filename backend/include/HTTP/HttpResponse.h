@@ -25,7 +25,9 @@ class HttpResponse {
        void setHeader(const std::string& key, const std::string& value);
 
        // Sets or overwrites a single reponse header.
-       void setStatusCode(int code);
+       void setStatusCode(const int& code);
+
+       void setBody(const std::string& data);
        /*
         Serializes the full response (status line, headers, blank line, body) into the exact bytes to write t the socket.
 

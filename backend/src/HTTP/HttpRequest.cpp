@@ -62,6 +62,6 @@ std::string HttpRequest::getBody() const {
     return body;
 }
 
-std::string HttpRequest::getClinetAddress() const {
+std::string HttpRequest::getClientAddress() const {
     return body;
 }

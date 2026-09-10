@@ -1,8 +1,6 @@
 #include "HTTP/HttpResponse.h"
 #include <sstream>
 
-int getStatusCode();
-
 HttpResponse HttpResponse::json(const std::string& data) {
     HttpResponse response;
 
@@ -29,10 +27,14 @@ void HttpResponse::setHeader(const std::string& key, const std::string& value) {
     headers[key] = value;
 }
 
-void HttpResponse::setStatusCode(int code) {
+void HttpResponse::setStatusCode(const int& code) {
     statusCode = code;
 }
 
+void HttpResponse::setBody(const std::string& data) {
+    body = data;
+    headers["Content-Length"] = std::to_string(data.size());
+}
 
 std::string HttpResponse::toString() const {
     std::ostringstream buffer;
@@ -46,8 +48,16 @@ std::string HttpResponse::toString() const {
         statusMessage = "Bad Request";
     }
 
+    else if(statusCode == 401) {
+        statusMessage = "Unauthorized";
+    }
+
     else if (statusCode == 404) {
         statusMessage = "Not Found";
+    }
+
+    else if (statusCode == 429) {
+        statusMessage = "Too Many Requests";
     }
 
     else if (statusCode == 500) {

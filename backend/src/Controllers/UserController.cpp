@@ -10,7 +10,7 @@ UserController::UserController() {
     nextId = 3;
 }
 
-HttpResponse UserController::getUsers (const HttpRequest& req) {
+HttpResponse UserController::getUsers (const HttpRequest&) {
     json result = json::array();
 
     for (const User& user: users) {

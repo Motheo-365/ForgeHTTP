@@ -8,8 +8,8 @@ void CorsMiddleware::handle(HttpRequest& req, HttpResponse& res, std::function<v
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
     // Handle CORS preflight request
-    if (req.method === HttpMethod::OPTIONS) {
-        res.status(204);
+    if (req.getMethod() == HttpMethod::OPTIONS) {
+        res.setStatusCode(204);
         return;
     }
 

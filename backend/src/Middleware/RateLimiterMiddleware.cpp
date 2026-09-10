@@ -1,12 +1,15 @@
 #include "Middleware/RateLimiterMiddleware.h"
 
+RateLimiterMiddleware::RateLimiterMiddleware(int limit)
+    : limit(limit) {}
+
 void RateLimiterMiddleware::handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) {
     requestCounts[req.getClientAddress()]++;
     
-    if (requestCount > limit) {
-        res.status(429);
+    if (requestCounts[req.getClientAddress()] > limit) {
+        res.setStatusCode(429);
         res.setHeader("Content-Type", "application");
-        res.body = "{\"error\":\"Too Many Requests\"}";
+        res.setBody("{\"error\":\"Too Many Requests\"}");
         return;
     }
 
