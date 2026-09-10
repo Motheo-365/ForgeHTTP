@@ -1,5 +1,6 @@
 import StatCard from "../components/statCard";
 import LineGraph from "../components/lineGraph";
+import RequestTable from "../components/requestTable";
 
 import { useMetrics } from "../context/metricsContext";
 
@@ -76,6 +77,7 @@ function Dashboard() {
                     </section>
 
                     <LineGraph />
+                    <RequestTable />
 
                     <section className="dashboard-section">
                         <div className="section-heading">
