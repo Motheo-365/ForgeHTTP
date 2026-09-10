@@ -65,3 +65,13 @@ HttpResponse RequestHistory::getRequests(std::size_t limit) {
     json << "]";
     return HttpResponse::json(json.str());
 }
+
+void RequestHistory::setMaxEntries(std::size_t newMaxEntries) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    maxEntries = newMaxEntries;
+
+    while (requests.size() > maxEntries) {
+        requests.pop_front();
+    }
+}

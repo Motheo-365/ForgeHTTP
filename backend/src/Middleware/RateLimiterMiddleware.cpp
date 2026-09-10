@@ -15,3 +15,7 @@ void RateLimiterMiddleware::handle(HttpRequest& req, HttpResponse& res, std::fun
 
     next();
 }
+
+void RateLimiterMiddleware::setLimit(std::size_t newLimit) {
+    limit = newLimit;
+}

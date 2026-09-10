@@ -10,21 +10,26 @@
 #include <memory>
 
 namespace {
-std::string methodName(HttpMethod method) {
-    switch (method) {
-        case HttpMethod::GET: return "GET";
-        case HttpMethod::POST: return "POST";
-        case HttpMethod::PUT: return "PUT";
-        case HttpMethod::DELETE: return "DELETE";
-        case HttpMethod::PATCH: return "PATCH";
-        case HttpMethod::OPTIONS: return "OPTIONS";
+    std::string methodName(HttpMethod method) {
+        switch (method) {
+            case HttpMethod::GET: return "GET";
+            case HttpMethod::POST: return "POST";
+            case HttpMethod::PUT: return "PUT";
+            case HttpMethod::DELETE: return "DELETE";
+            case HttpMethod::PATCH: return "PATCH";
+            case HttpMethod::OPTIONS: return "OPTIONS";
+        }
+
+        return "UNKNOWN";
     }
-
-    return "UNKNOWN";
-}
 }
 
-Server::Server() : pool(8), metricsConnector(8), rateLimiterMiddleware(100) {
+Server::Server()
+    : config(),
+      pool(config.workerThreads),
+      metricsConnector(config.workerThreads),
+      rateLimiterMiddleware(config.rateLimit),
+      requestHistory(config.requestHistoryLimit) {
     events.subscribe(&logger);
     events.subscribe(&metricsConnector);
     events.subscribe(&requestHistory);
@@ -48,6 +53,25 @@ Server::Server() : pool(8), metricsConnector(8), rateLimiterMiddleware(100) {
     router.get("/metrics", [this](const HttpRequest&) {
         return metricsConnector.getMetrics();
     });
+
+    router.get("/api/config", [this](const HttpRequest&) {
+        return configurationController.getConfig(config);
+    });
+
+    router.put("/api/config", [this](const HttpRequest& request) {
+        std::string error;
+
+        if (!configurationController.parseConfig(request, config, error)) {
+            HttpResponse response = HttpResponse::json(
+                "{\"error\":\"" + error + "\"}"
+            );
+            response.setStatusCode(400);
+            return response;
+        }
+
+        updateConfig(config);
+        return configurationController.getConfig(config);
+    });
 }
 
 Server::~Server() {
@@ -62,19 +86,29 @@ void Server::start(int port) {
             port = std::stoi(environmentPort);
         }
         else {
-            port = 8085;
+            port = config.port;
         }
     }
 
     listenSocket.bind(port);
     listenSocket.listen(10);
+
     running = true;
 
-    std::cout << "ForgeHTTP\n----------------------------------------\n";
-    std::cout << "\nServer running on port " << port << '\n';
-    std::cout << "Workers: 8\n\n";
+    std::cout << "ForgeHTTP\n"
+              << "----------------------------------------\n";
 
-    events.publish({ServerEventType::ServerStarted, std::chrono::system_clock::now()});
+    std::cout << "\nServer running on port "
+              << port << '\n';
+
+    std::cout << "Workers: "
+              << config.workerThreads
+              << "\n\n";
+
+    events.publish({
+        ServerEventType::ServerStarted,
+        std::chrono::system_clock::now()
+    });
 
     acceptConnections();
 }
@@ -190,4 +224,20 @@ void Server::handleConnection(Connection& c) {
     }
 
     c.close();
+}
+
+const ServerConfig& Server::getConfig() const {
+    return config;
+}
+
+void Server::updateConfig(const ServerConfig& newConfig) {
+    config = newConfig;
+
+    rateLimiterMiddleware.setLimit(
+        config.rateLimit
+    );
+
+    requestHistory.setMaxEntries(
+        config.requestHistoryLimit
+    );
 }

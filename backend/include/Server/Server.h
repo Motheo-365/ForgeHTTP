@@ -15,6 +15,8 @@
 #include "Observability/MetricsConnector.h"
 #include "Observability/ServerEventPublisher.h"
 #include "Observability/RequestHistory.h"
+#include "ServerConfig.h"
+#include "Controllers/ConfigurationController.h"
 
 #include <utility>
 
@@ -37,10 +39,14 @@ class Server {
         */
         void stop();
 
+        const ServerConfig& getConfig() const;
+        void updateConfig(const ServerConfig& newConfig);
+
     private:
+        ServerConfig config;
+
         Socket listenSocket;
         ThreadPool pool;
-
         Router router;
         HealthController healthController;
         UserController userController;
@@ -52,6 +58,7 @@ class Server {
         MetricsConnector metricsConnector;
         RequestHistory requestHistory;
         ServerEventPublisher events;
+        ConfigurationController configurationController;
 
         bool running = false;
         

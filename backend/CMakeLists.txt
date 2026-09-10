@@ -43,6 +43,9 @@ list(REMOVE_ITEM SOURCES
 add_executable(forge
     ${SOURCES}
     "${PROJECT_SOURCE_DIR}/src/main.cpp"
+    include/Server/ServerConfig.h
+    include/Controllers/ConfigurationController.h
+    src/Controllers/ConfigurationController.cpp
 )
 
 target_link_libraries(forge PRIVATE

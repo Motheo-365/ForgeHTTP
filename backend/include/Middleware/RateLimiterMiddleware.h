@@ -13,6 +13,7 @@ class RateLimiterMiddleware : public Middleware {
             Tracks request count per client (e.g. by IP), and if the caller has exceed the configure threshold, sets a 429 response and returns without calling next().
         */
         void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
+        void setLimit(std::size_t limit);
 
     private:
         std::unordered_map<std::string, int> requestCounts;
