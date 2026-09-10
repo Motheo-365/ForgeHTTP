@@ -372,7 +372,7 @@ Coordinates the networking, HTTP, middleware, and routing components.
 
 ### Observability Layer
 
-`ServerEventPublisher` publishes lifecycle and request events to `Logger` and `MetricsCollector`. The metrics snapshot is available at `/metrics`.
+`ServerEventPublisher` publishes lifecycle and request events to `Logger` and `MetricsConnector`. The metrics snapshot is available at `/metrics`.
 
 ---
 

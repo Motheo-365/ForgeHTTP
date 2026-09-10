@@ -24,9 +24,9 @@ std::string methodName(HttpMethod method) {
 }
 }
 
-Server::Server() : pool(8), metricsCollector(8), rateLimiterMiddleware(100) {
+Server::Server() : pool(8), metricsConnector(8), rateLimiterMiddleware(100) {
     events.subscribe(&logger);
-    events.subscribe(&metricsCollector);
+    events.subscribe(&metricsConnector);
 
     router.get("/health", [this](const HttpRequest& req) {
         return healthController.getHealth(req);
@@ -41,7 +41,7 @@ Server::Server() : pool(8), metricsCollector(8), rateLimiterMiddleware(100) {
     });
 
     router.get("/metrics", [this](const HttpRequest&) {
-        return metricsCollector.getMetrics();
+        return metricsConnector.getMetrics();
     });
 }
 

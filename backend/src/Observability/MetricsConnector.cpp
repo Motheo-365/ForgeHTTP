@@ -1,39 +1,41 @@
-#include "Observability/MetricsCollector.h"
+#include "Observability/MetricsConnector.h"
 
 #include <sstream>
 
-MetricsCollector::MetricsCollector(int workers) : workers(workers) {}
+MetricsConnector::MetricsConnector(int workers) : workers(workers) {}
 
-void MetricsCollector::onEvent(const ServerEvent& e) {
+void MetricsConnector::onEvent(const ServerEvent& event) {
     std::lock_guard<std::mutex> lock(mutex);
 
-    if (e.type == ServerEventType::RequestReceived) {
+    if (event.type == ServerEventType::RequestReceived) {
         activeConnections++;
         return;
     }
 
-    if (e.type != ServerEventType::ResponseSent) {
+    if (event.type != ServerEventType::ResponseSent) {
         return;
     }
 
     requestCount++;
     activeConnections--;
 
-    avgResponse = ((avgResponse * (requestCount - 1)) + e.durationMs) / requestCount;
+    averageResponse =
+        ((averageResponse * (requestCount - 1)) + event.durationMs) /
+        requestCount;
 
-    if (e.statusCode >= 400) {
+    if (event.statusCode >= 400) {
         errorCount++;
     }
 }
 
-HttpResponse MetricsCollector::getMetrics() {
+HttpResponse MetricsConnector::getMetrics() {
     std::lock_guard<std::mutex> lock(mutex);
     std::ostringstream json;
 
     json << "{"
          << "\"requests\": " << requestCount << ","
          << "\"active_connections\": " << activeConnections << ","
-         << "\"average_response_time_ms\": " << avgResponse << ","
+         << "\"average_response_time_ms\": " << averageResponse << ","
          << "\"errors\": " << errorCount << ","
          << "\"workers\": " << workers
          << "}";

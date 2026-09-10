@@ -12,7 +12,7 @@
 #include "Observability/EventObserver.h"
 #include "Observability/ServerEventPublisher.h"
 #include "Observability/Logger.h"
-#include "Observability/MetricsController.h"
+#include "Observability/MetricsConnector.h"
 
 #include <exception>
 #include <iostream>
@@ -705,12 +705,12 @@ void testObservability() {
 
 
     // ----------------------------------------------
-    // MetricsController - Request Count
+    // MetricsConnector - Request Count
     // ----------------------------------------------
 
     try {
 
-        MetricsController metrics;
+        MetricsConnector metrics;
 
         ServerEvent responseEvent{
             ServerEventType::ResponseSent,
@@ -728,11 +728,11 @@ void testObservability() {
         std::string output = response.toString();
 
         if (output.find("\"requests\": 2") != std::string::npos) {
-            pass("Metrics controller counts responses");
+            pass("MetricsConnector counts responses");
         }
         else {
             fail(
-                "Metrics controller counts responses",
+                "MetricsConnector counts responses",
                 "Expected requests=2"
             );
         }
@@ -741,19 +741,19 @@ void testObservability() {
     catch (const std::exception& e) {
 
         fail(
-            "Metrics controller counts responses",
+            "MetricsConnector counts responses",
             e.what()
         );
     }
 
 
     // ----------------------------------------------
-    // MetricsController - Average Response Time
+    // MetricsConnector - Average Response Time
     // ----------------------------------------------
 
     try {
 
-        MetricsController metrics;
+        MetricsConnector metrics;
 
         ServerEvent first{
             ServerEventType::ResponseSent,
@@ -783,11 +783,11 @@ void testObservability() {
             output.find("\"average_response_time_ms\": 15") 
             != std::string::npos
         ) {
-            pass("Metrics controller calculates average response time");
+            pass("MetricsConnector calculates average response time");
         }
         else {
             fail(
-                "Metrics controller calculates average response time",
+                "MetricsConnector calculates average response time",
                 "Expected average response time of 15ms"
             );
         }
@@ -796,19 +796,19 @@ void testObservability() {
     catch (const std::exception& e) {
 
         fail(
-            "Metrics controller calculates average response time",
+            "MetricsConnector calculates average response time",
             e.what()
         );
     }
 
 
     // ----------------------------------------------
-    // MetricsController - Error Count
+    // MetricsConnector - Error Count
     // ----------------------------------------------
 
     try {
 
-        MetricsController metrics;
+        MetricsConnector metrics;
 
         ServerEvent success{
             ServerEventType::ResponseSent,
@@ -845,11 +845,11 @@ void testObservability() {
         std::string output = response.toString();
 
         if (output.find("\"errors\": 2") != std::string::npos) {
-            pass("Metrics controller counts HTTP errors");
+            pass("MetricsConnector counts HTTP errors");
         }
         else {
             fail(
-                "Metrics controller counts HTTP errors",
+                "MetricsConnector counts HTTP errors",
                 "Expected errors=2"
             );
         }
@@ -858,19 +858,19 @@ void testObservability() {
     catch (const std::exception& e) {
 
         fail(
-            "Metrics controller counts HTTP errors",
+            "MetricsConnector counts HTTP errors",
             e.what()
         );
     }
 
 
     // ----------------------------------------------
-    // MetricsController - Response
+    // MetricsConnector - Response
     // ----------------------------------------------
 
     try {
 
-        MetricsController metrics;
+        MetricsConnector metrics;
 
         ServerEvent event{
             ServerEventType::ResponseSent,
@@ -926,7 +926,7 @@ void testObservability() {
     try {
 
         ServerEventPublisher publisher;
-        MetricsController metrics;
+        MetricsConnector metrics;
 
         publisher.subscribe(&metrics);
 
@@ -948,19 +948,19 @@ void testObservability() {
             output.find("\"requests\": 1")
             != std::string::npos
         ) {
-            pass("Publisher integrates with MetricsController");
+            pass("Publisher integrates with MetricsConnector");
         }
         else {
             fail(
-                "Publisher integrates with MetricsController"
+                "Publisher integrates with MetricsConnector"
             );
         }
 
     }
     catch (const std::exception& e) {
 
-        fail(
-            "Publisher integrates with MetricsController",
+            fail(
+                "Publisher integrates with MetricsConnector",
             e.what()
         );
     }

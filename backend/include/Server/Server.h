@@ -12,7 +12,7 @@
 #include "Middleware/LoggerMiddleware.h"
 #include "Middleware/RateLimiterMiddleware.h"
 #include "Observability/Logger.h"
-#include "Observability/MetricsCollector.h"
+#include "Observability/MetricsConnector.h"
 #include "Observability/ServerEventPublisher.h"
 
 #include <utility>
@@ -48,7 +48,7 @@ class Server {
         AuthMiddleware authMiddleware;
         RateLimiterMiddleware rateLimiterMiddleware;
         Logger logger;
-        MetricsCollector metricsCollector;
+        MetricsConnector metricsConnector;
         ServerEventPublisher events;
 
         bool running = false;

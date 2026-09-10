@@ -88,7 +88,7 @@ Each layer only knows about the layer directly below it:
 - **HttpParser** turns raw bytes into an `HttpRequest`; it knows nothing about routing.
 - **Router** maps method + path to a handler; it knows nothing about sockets.
 - **Middleware** runs before routing: CORS, logger, rate limiter, and auth for `/api/*` routes.
-- **Observability** is cross-cutting, not part of the request pipeline: `Server` owns a `ServerEventPublisher` and publishes lifecycle/request events to it (connection accepted, response sent, server started/stopped); `Logger` and `MetricsCollector` subscribe independently and react without `Server` knowing who's listening.
+- **Observability** is cross-cutting, not part of the request pipeline: `Server` owns a `ServerEventPublisher` and publishes lifecycle/request events to it (connection accepted, response sent, server started/stopped); `Logger` and `MetricsConnector` subscribe independently and react without `Server` knowing who's listening.
 
 ---
 
