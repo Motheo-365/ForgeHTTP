@@ -1,7 +1,7 @@
-import SideBar from '../components/sideBar'
-import ServiceStatus from '../components/serviceTable'
-import LineGraph from '../components/lineGraph';
-import StatCard from '../components/statCard';
+import SideBar from '../components0/sideBar'
+import ServiceStatus from '../components0/serviceTable'
+import LineGraph from '../components0/lineGraph';
+import StatCard from '../components0/statCard';
 
 function Dashboard() {
     return (
