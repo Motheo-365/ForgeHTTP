@@ -85,6 +85,7 @@
 .intro-section {
     padding: 48px 0;
     border-bottom: var(--border-width) solid var(--border);
+    scroll-margin-top: calc(var(--header-height) + var(--space-5));
 }
 
 .section-label {

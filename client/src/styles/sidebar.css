@@ -1,6 +1,12 @@
 .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
     width: var(--sidebar-width);
     min-height: 100vh;
+
+    overflow-y: auto;
 
     background: var(--bg-panel);
     border-right: var(--border-width) solid var(--border);

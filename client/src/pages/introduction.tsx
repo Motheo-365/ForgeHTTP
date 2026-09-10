@@ -1,6 +1,28 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
 import "../styles/introduction.css";
 
 function Introduction() {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (!location.hash) {
+            return;
+        }
+
+        const target = document.getElementById(location.hash.slice(1));
+
+        if (target) {
+            requestAnimationFrame(() => {
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            });
+        }
+    }, [location.hash]);
+
     return (
         <div className="introduction">
             <section className="intro-hero">
@@ -28,7 +50,7 @@ function Introduction() {
                 </div>
             </section>
 
-            <section className="intro-section">
+                <section id="overview" className="intro-section">
                 <div className="section-label">01 / OVERVIEW</div>
 
                 <h2>What is ForgeHTTP?</h2>
@@ -86,7 +108,7 @@ function Introduction() {
                 </div>
             </section>
 
-            <section className="intro-section">
+                <section id="request-lifecycle" className="intro-section">
                 <div className="section-label">02 / REQUEST LIFECYCLE</div>
 
                 <h2>How ForgeHTTP works</h2>
@@ -161,7 +183,7 @@ function Introduction() {
                 </div>
             </section>
 
-            <section className="intro-section">
+                <section id="dashboard" className="intro-section">
                 <div className="section-label">03 / DASHBOARD</div>
 
                 <h2>Using the dashboard</h2>
@@ -232,7 +254,7 @@ function Introduction() {
                 </div>
             </section>
 
-            <section className="intro-section intro-quick-start">
+            <section id="quick-start" className="intro-section intro-quick-start">
                 <div className="section-label">04 / QUICK START</div>
 
                 <h2>Get started</h2>
