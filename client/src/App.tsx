@@ -10,6 +10,7 @@ import Middleware from "./pages/middleware";
 import Metrics from "./pages/metrics";
 import Health from "./pages/health";
 import Configuration from "./pages/configuration";
+import Terminal from "./pages/terminal";
 import { MetricsProvider } from "./context/metricsContext";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
                         <Route path="/metrics" element={<Metrics />} />
                         <Route path="/health" element={<Health />} />
                         <Route path="/configuration" element={<Configuration />} />
+                        <Route path="/terminal" element={<Terminal />} />
                     </Route>
                 </Routes>
             </MetricsProvider>

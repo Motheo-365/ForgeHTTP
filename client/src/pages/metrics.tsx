@@ -50,7 +50,10 @@ function Metrics() {
     const chartWidth = 100;
     const chartHeight = 100;
 
-    const createPoints = (values, maxValue) => {
+    const createPoints = (
+        values: number[],
+        maxValue: number
+    ): string[] => {
         return values.map((value, index) => {
             const x =
                 values.length === 1
@@ -76,7 +79,7 @@ function Metrics() {
         maxRequests
     );
 
-    const formatTime = (index) => {
+    const formatTime = (index: number): string => {
         if (!metricsHistory[index]) {
             return "";
         }

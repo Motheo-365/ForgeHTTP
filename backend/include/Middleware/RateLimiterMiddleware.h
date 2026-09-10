@@ -2,22 +2,35 @@
 #define RATELIMITERMIDDLEWARE_H
 
 #include "Middleware.h"
-#include <unordered_map>
+
+#include <chrono>
 #include <string>
+#include <unordered_map>
 
-// Caps how many requests a client can make in a given window.
 class RateLimiterMiddleware : public Middleware {
-    public:
-        RateLimiterMiddleware (int limit);
-        /*
-            Tracks request count per client (e.g. by IP), and if the caller has exceed the configure threshold, sets a 429 response and returns without calling next().
-        */
-        void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
-        void setLimit(std::size_t limit);
 
-    private:
-        std::unordered_map<std::string, int> requestCounts;
-        int limit;
+public:
+    RateLimiterMiddleware(int limit);
+
+    /**
+     * Tracks request count per client within a 60-second window.
+     * If the caller exceeds the configured threshold, sets a 429 response
+     * and returns without calling next().
+     */
+    void handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) override;
+
+    void setLimit(std::size_t limit);
+
+private:
+    struct ClientRateLimit {
+        int count = 0;
+        std::chrono::steady_clock::time_point windowStart;
+    };
+
+    std::unordered_map<std::string, ClientRateLimit> requestCounts;
+
+    int limit;
+    std::chrono::seconds window{60};
 };
 
 #endif

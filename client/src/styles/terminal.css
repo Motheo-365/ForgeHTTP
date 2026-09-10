@@ -1,0 +1,131 @@
+.terminal-page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 32px 40px 40px;
+}
+
+.terminal-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+}
+
+.terminal-page-header h1 {
+    margin: 6px 0 8px;
+}
+
+.terminal-page-header p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.terminal-clear-button {
+    padding: 9px 14px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.terminal-clear-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.terminal-window {
+    border: 1px solid var(--border);
+    background: #080b08;
+    min-height: 620px;
+    cursor: text;
+}
+
+.terminal-window-header {
+    height: 44px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-panel);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+
+.terminal-status {
+    color: var(--accent);
+}
+
+.terminal-output {
+    height: 576px;
+    overflow-y: auto;
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.terminal-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.terminal-command {
+    color: var(--accent);
+}
+
+.terminal-input-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+}
+
+.terminal-input-line input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+}
+
+.terminal-cursor {
+    color: var(--accent);
+    animation: terminal-blink 1s steps(2, start) infinite;
+}
+
+@keyframes terminal-blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 800px) {
+    .terminal-page {
+        padding: 24px 20px;
+    }
+
+    .terminal-page-header {
+        align-items: flex-start;
+        gap: 16px;
+        flex-direction: column;
+    }
+
+    .terminal-window {
+        min-height: 500px;
+    }
+
+    .terminal-output {
+        height: 456px;
+        padding: 16px;
+    }
+}

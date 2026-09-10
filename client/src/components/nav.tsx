@@ -62,6 +62,21 @@ function Nav() {
                             </Link>
 
                             <Link
+                                to="/introduction#server-guide"
+                                className={isIntroductionSectionActive("server-guide") ? "active" : ""}
+                                aria-current={isIntroductionSectionActive("server-guide") ? "page" : undefined}
+                            >
+                                Server Guide
+                            </Link>
+
+                            <Link
+                                to="/introduction#terminal"
+                                className={isIntroductionSectionActive("terminal") ? "active" : ""}
+                                aria-current={isIntroductionSectionActive("terminal") ? "page" : undefined}
+                            >
+                                Terminal
+                            </Link>
+                            <Link
                                 to="/introduction#quick-start"
                                 className={isIntroductionSectionActive("quick-start") ? "active" : ""}
                                 aria-current={isIntroductionSectionActive("quick-start") ? "page" : undefined}

@@ -70,6 +70,17 @@
     color: var(--accent);
     animation: cursor-blink 1s steps(1) infinite;
 }
+.intro-guide-link {
+    display: inline-block;
+    margin-top: var(--space-5);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+.intro-guide-link:hover {
+    color: var(--text);
+}
 
 @keyframes cursor-blink {
     50% {
@@ -222,6 +233,94 @@
 
 
 /* --------------------------------
+   Server Guide
+--------------------------------- */
+
+.server-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+
+    margin-top: var(--space-7);
+}
+
+.server-guide-step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: var(--space-4);
+
+    padding: 20px;
+
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+}
+
+.server-guide-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+}
+
+.server-guide-divider::before,
+.server-guide-divider::after {
+    content: "";
+    height: var(--border-width);
+    background: var(--accent);
+}
+
+.server-guide-divider::before {
+    width: var(--space-5);
+}
+
+.server-guide-divider::after {
+    flex: 1;
+}
+
+.server-guide-number {
+    color: var(--accent);
+    font-size: 11px;
+}
+
+.server-guide-step h3 {
+    margin: 0 0 var(--space-2);
+
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.server-guide-step p {
+    margin: 0;
+
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.server-guide-step pre {
+    overflow-x: auto;
+    margin: var(--space-4) 0 0;
+    padding: 12px;
+
+    background: var(--bg);
+    border-left: 2px solid var(--accent);
+}
+
+.server-guide-step code {
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    white-space: pre;
+}
+
+
+/* --------------------------------
    Quick Start
 --------------------------------- */
 
@@ -274,6 +373,7 @@
     }
 
     .tech-grid,
+    .server-guide-grid,
     .quick-start {
         grid-template-columns: 1fr;
     }

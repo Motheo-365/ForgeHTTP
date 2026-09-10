@@ -3,7 +3,8 @@ import type {
     Metrics,
     User,
     CreateUserRequest,
-    RequestHistoryEntry
+    RequestHistoryEntry,
+    ServerConfiguration
 } from "../types/api";
 
 const DEFAULT_API_URL = "https://forgehttp.onrender.com"
@@ -80,4 +81,41 @@ export async function getRequestHistory(): Promise<RequestHistoryEntry[]> {
     }
 
     return response.json();
+}
+
+export async function getConfiguration(): Promise<ServerConfiguration> {
+    const response = await fetch(`${API_URL}/api/config`, {
+        headers: {
+            Authorization: "Bearer dashboard"
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch configuration: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export async function updateConfiguration(
+    configuration: ServerConfiguration
+): Promise<ServerConfiguration> {
+    const response = await fetch(`${API_URL}/api/config`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer dashboard"
+        },
+        body: JSON.stringify(configuration)
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(
+            data?.error || `Failed to update configuration: ${response.status}`
+        );
+    }
+
+    return data as ServerConfiguration;
 }

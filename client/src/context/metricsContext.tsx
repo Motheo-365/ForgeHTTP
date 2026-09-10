@@ -9,12 +9,13 @@ import {
 import * as api from "../services/api";
 import type {
     Metrics,
+    MetricsSample,
     RequestHistoryEntry
 } from "../types/api";
 
 interface MetricsContextType {
     metrics: Metrics | null;
-    metricsHistory: Metrics[];
+    metricsHistory: MetricsSample[];
     requestHistory: RequestHistoryEntry[];
     loading: boolean;
     error: string | null;
@@ -26,7 +27,7 @@ const MetricsContext = createContext<MetricsContextType | undefined>(
 
 export function MetricsProvider({ children }: { children: ReactNode }) {
     const [metrics, setMetrics] = useState<Metrics | null>(null);
-    const [metricsHistory, setMetricsHistory] = useState<Metrics[]>([]);
+    const [metricsHistory, setMetricsHistory] = useState<MetricsSample[]>([]);
     const [requestHistory, setRequestHistory] = useState<RequestHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -41,9 +42,18 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
 
                 setMetrics(metricsData);
 
+                const sample: MetricsSample = {
+                    ...metricsData,
+                    time: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                    })
+                };
+
                 setMetricsHistory((previous) => [
                     ...previous,
-                    metricsData
+                    sample
                 ]);
 
                 setRequestHistory(requestData);

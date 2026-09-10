@@ -28,17 +28,74 @@
     font-size: 14px;
 }
 
-.configuration-readonly {
+.configuration-save-button {
     padding: 7px 10px;
 
     border: 1px solid var(--border-light);
     background: var(--bg-panel);
 
-    color: var(--text-muted);
+    color: var(--text);
 
     font-family: var(--mono);
     font-size: 9px;
     letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+.configuration-save-button:disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.configuration-feedback {
+    margin: -12px 0 24px;
+
+    color: var(--success);
+    font-family: var(--mono);
+    font-size: 11px;
+}
+
+.configuration-feedback-error {
+    color: var(--danger, #d66);
+}
+
+.configuration-loading {
+    grid-column: 1 / -1;
+    padding: 24px;
+
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
+}
+
+.configuration-input {
+    width: 100%;
+    max-width: 150px;
+    padding: 6px 8px;
+
+    border: 1px solid var(--border-light);
+    background: var(--bg);
+
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 16px;
+}
+
+.configuration-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--success);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+}
+
+.configuration-toggle input {
+    accent-color: var(--success);
 }
 
 .configuration-section {
@@ -49,9 +106,16 @@
 }
 
 .configuration-section-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
     padding: 20px 24px;
 
     border-bottom: 1px solid var(--border);
+}
+
+.configuration-section-header > div {
+    min-width: 0;
 }
 
 .configuration-section-header h2 {
@@ -61,6 +125,19 @@
 
     font-size: 18px;
     font-weight: 500;
+}
+
+.configuration-section-header a {
+    margin-left: auto;
+
+    color: var(--accent);
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+}
+
+.configuration-section-header a:hover {
+    color: var(--accent-hover);
 }
 
 /* SERVER */
@@ -174,6 +251,109 @@
     font-size: 11px;
 }
 
+
+.configuration-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.configuration-info-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.configuration-info-item:nth-child(odd) {
+    border-right: 1px solid var(--border);
+}
+
+.configuration-info-item:nth-last-child(-n + 2) {
+    border-bottom: none;
+}
+
+.configuration-info-item strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.configuration-info-item p {
+    max-width: 700px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.configuration-info-status {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 7px;
+    border: 1px solid var(--border-light);
+    color: var(--warning);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+}
+
+.configuration-info-status.configuration-info-live {
+    border-color: var(--accent-border);
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.configuration-info-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.configuration-info-note strong {
+    flex-shrink: 0;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+}
+
+.configuration-info-note span {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.configuration-info-note code {
+    margin-left: 6px;
+    padding: 2px 5px;
+    background: var(--bg-panel);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+}
+
+@media (max-width: 900px) {
+    .configuration-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .configuration-info-item:nth-child(odd) {
+        border-right: none;
+    }
+
+    .configuration-info-item:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .configuration-info-item:last-child {
+        border-bottom: none;
+    }
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 900px) {
@@ -229,5 +409,9 @@
 
     .configuration-active {
         margin-left: auto;
+    }
+    .configuration-info-note {
+        flex-direction: column;
+        gap: 8px;
     }
 }

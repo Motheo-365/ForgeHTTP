@@ -10,6 +10,10 @@ export interface Metrics {
     workers: number;
 }
 
+export interface MetricsSample extends Metrics {
+    time: string;
+}
+
 export interface RequestHistoryEntry {
     time: string;
     method: string;
@@ -25,4 +29,14 @@ export interface User {
 
 export interface CreateUserRequest {
     name: string;
+}
+
+export interface ServerConfiguration {
+    port: number;
+    workerThreads: number;
+    rateLimit: number;
+    requestHistoryLimit: number;
+    corsEnabled: boolean;
+    authenticationEnabled: boolean;
+    loggingEnabled: boolean;
 }
