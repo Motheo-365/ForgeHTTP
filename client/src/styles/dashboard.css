@@ -1,0 +1,141 @@
+.dashboard-page {
+    width: 100%;
+}
+
+.page-header {
+    padding-bottom: var(--space-7);
+    border-bottom: var(--border-width) solid var(--border);
+}
+
+.page-label {
+    display: block;
+    margin-bottom: var(--space-3);
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.page-header h1 {
+    margin-bottom: var(--space-3);
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+
+/* --------------------------------
+   Loading / Error
+--------------------------------- */
+
+.dashboard-message {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    margin-top: var(--space-7);
+    padding: var(--space-5);
+
+    color: var(--text-secondary);
+
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+}
+
+.dashboard-error {
+    border-left: 2px solid var(--error);
+}
+
+.dashboard-error strong {
+    color: var(--error);
+    font-size: 12px;
+}
+
+
+/* --------------------------------
+   Statistics
+--------------------------------- */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-3);
+
+    margin-top: var(--space-7);
+}
+
+
+/* --------------------------------
+   Runtime
+--------------------------------- */
+
+.dashboard-section {
+    margin-top: 48px;
+}
+
+.section-heading {
+    margin-bottom: var(--space-5);
+}
+
+.section-heading h2 {
+    margin-bottom: 0;
+}
+
+.runtime-panel {
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+}
+
+.runtime-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px 16px;
+
+    border-bottom: var(--border-width) solid var(--border);
+
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.runtime-row:last-child {
+    border-bottom: none;
+}
+
+.runtime-value {
+    color: var(--accent);
+    font-size: 11px;
+}
+
+
+/* --------------------------------
+   Responsive
+--------------------------------- */
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .runtime-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}

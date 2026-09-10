@@ -1,5 +1,6 @@
 import type {
     HealthResponse,
+    Metrics,
     User,
     CreateUserRequest
 } from "../types/api";
@@ -16,6 +17,18 @@ export async function getHealth (): Promise<HealthResponse> {
 
     if (!response.ok) {
         throw new Error(`Health check failed: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export async function getMetrics(): Promise<Metrics> {
+    const response = await fetch(`${API_URL}/metrics`);
+
+    if (!response.ok) {
+        throw new Error(
+            `Failed to fetch metrics: ${response.status}`
+        );
     }
 
     return response.json();
