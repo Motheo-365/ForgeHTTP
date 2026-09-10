@@ -61,3 +61,7 @@ std::string HttpRequest::getVersion() const {
 std::string HttpRequest::getBody() const {
     return body;
 }
+
+std::string HttpRequest::getClinetAddress() const {
+    return body;
+}

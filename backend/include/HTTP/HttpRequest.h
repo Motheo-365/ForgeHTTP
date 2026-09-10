@@ -23,6 +23,7 @@ class HttpRequest {
         HttpMethod getMethod() const;
         std::string getVersion() const;
         std::string getBody() const;
+        std::string getClientAddress() const;
 
 private:
         friend class HttpParser;
@@ -33,6 +34,7 @@ private:
         HttpMethod method;
         std::string path;
         std::string version;
+        std::string clientAddress;
 
         /*
             All request header, keyed by name (e.g. "Host", "Accept")
