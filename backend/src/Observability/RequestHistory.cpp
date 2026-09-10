@@ -4,12 +4,27 @@
 #include <iomanip>
 #include <sstream>
 
+namespace {
+
+bool isDashboardRequest(const ServerEvent &event) {
+    return event.method == "OPTIONS" ||
+           event.path == "/health" ||
+           event.path == "/metrics" ||
+           event.path == "/api/requests";
+}
+
+}
+
 RequestHistory::RequestHistory(std::size_t maxEntries)
     : maxEntries(maxEntries) {}
 
 void RequestHistory::onEvent(const ServerEvent &event) {
 
     if (event.type != ServerEventType::ResponseSent) {
+        return;
+    }
+
+    if (isDashboardRequest(event)) {
         return;
     }
 

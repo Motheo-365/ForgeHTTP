@@ -759,7 +759,7 @@ void testObservability() {
             ServerEventType::ResponseSent,
             std::chrono::system_clock::now(),
             "GET",
-            "/health",
+            "/api/users",
             200,
             10.0
         };
@@ -814,7 +814,7 @@ void testObservability() {
             ServerEventType::ResponseSent,
             std::chrono::system_clock::now(),
             "GET",
-            "/health",
+            "/api/users",
             200,
             5.0
         };
@@ -876,7 +876,7 @@ void testObservability() {
             ServerEventType::ResponseSent,
             std::chrono::system_clock::now(),
             "GET",
-            "/health",
+            "/api/users",
             200,
             4.0
         };
