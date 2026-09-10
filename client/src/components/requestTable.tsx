@@ -1,17 +1,13 @@
 import { useState } from "react";
-
 import { useMetrics } from "../context/metricsContext";
 
 import "../styles/requestTable.css";
 
 function RequestTable() {
-    const { metricsHistory } = useMetrics();
-
-    const [sampleCount, setSampleCount] = useState(10);
-
-    const recentRequests = [...metricsHistory]
-        .slice(-sampleCount)
-        .reverse();
+    const { requestHistory } = useMetrics();
+    
+    const [sampleCount, setSampleCount] = useState(5);
+    const recentRequests = requestHistory.slice(0, sampleCount);
 
     return (
         <section className="request-table">
@@ -30,10 +26,11 @@ function RequestTable() {
                         setSampleCount(Number(event.target.value))
                     }
                 >
-                    <option value={10}>Last 10 samples</option>
-                    <option value={25}>Last 25 samples</option>
-                    <option value={50}>Last 50 samples</option>
-                    <option value={100}>Last 100 samples</option>
+                    <option value={5}>Last 5 requests</option>
+                    <option value={10}>Last 10 requests</option>
+                    <option value={25}>Last 25 requests</option>
+                    <option value={50}>Last 50 requests</option>
+                    <option value={100}>Last 100 requests</option>
                 </select>
             </div>
 
@@ -46,41 +43,41 @@ function RequestTable() {
                     <table>
                         <thead>
                             <tr>
-                                <th>SAMPLE</th>
-                                <th>REQUESTS</th>
-                                <th>ACTIVE</th>
-                                <th>AVG RESPONSE</th>
-                                <th>ERRORS</th>
+                                <th>TIME</th>
+                                <th>METHOD</th>
+                                <th>PATH</th>
+                                <th>STATUS</th>
+                                <th>DURATION</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {recentRequests.map((metrics, index) => (
+                            {recentRequests.map((request, index) => (
                                 <tr key={index}>
                                     <td>
-                                        {metricsHistory.length - index}
+                                        {request.time}
                                     </td>
 
                                     <td>
-                                        {metrics.requests.toLocaleString()}
+                                        {request.method}
                                     </td>
 
                                     <td>
-                                        {metrics.active_connections}
-                                    </td>
-
-                                    <td>
-                                        {metrics.average_response_time_ms.toFixed(2)} ms
+                                        {request.path}
                                     </td>
 
                                     <td
                                         className={
-                                            metrics.errors > 0
+                                            request.status >= 400
                                                 ? "request-error"
                                                 : ""
                                         }
                                     >
-                                        {metrics.errors}
+                                        {request.status}
+                                    </td>
+
+                                    <td>
+                                        {request.duration_ms.toFixed(2)} ms
                                     </td>
                                 </tr>
                             ))}

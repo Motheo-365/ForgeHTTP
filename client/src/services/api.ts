@@ -2,7 +2,8 @@ import type {
     HealthResponse,
     Metrics,
     User,
-    CreateUserRequest
+    CreateUserRequest,
+    RequestHistoryEntry
 } from "../types/api";
 
 const DEFAULT_API_URL = "https://forgehttp.onrender.com"
@@ -60,6 +61,22 @@ export async function createUser (user: CreateUserRequest): Promise<User> {
 
     if (!response.ok) {
         throw new Error(`Failed to create user: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export async function getRequestHistory(): Promise<RequestHistoryEntry[]> {
+    const response = await fetch(`${API_URL}/api/requests`, {
+        headers: {
+            Authorization: "Bearer dashboard"
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `Failed to fetch request history: ${response.status}`
+        );
     }
 
     return response.json();

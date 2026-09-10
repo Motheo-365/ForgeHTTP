@@ -7,11 +7,15 @@ import {
 } from "react";
 
 import * as api from "../services/api";
-import type { Metrics } from "../types/api";
+import type {
+    Metrics,
+    RequestHistoryEntry
+} from "../types/api";
 
 interface MetricsContextType {
     metrics: Metrics | null;
     metricsHistory: Metrics[];
+    requestHistory: RequestHistoryEntry[];
     loading: boolean;
     error: string | null;
 }
@@ -23,20 +27,26 @@ const MetricsContext = createContext<MetricsContextType | undefined>(
 export function MetricsProvider({ children }: { children: ReactNode }) {
     const [metrics, setMetrics] = useState<Metrics | null>(null);
     const [metricsHistory, setMetricsHistory] = useState<Metrics[]>([]);
+    const [requestHistory, setRequestHistory] = useState<RequestHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadMetrics() {
             try {
-                const data = await api.getMetrics();
+                const [metricsData, requestData] = await Promise.all([
+                    api.getMetrics(),
+                    api.getRequestHistory()
+                ]);
 
-                setMetrics(data);
+                setMetrics(metricsData);
 
                 setMetricsHistory((previous) => [
                     ...previous,
-                    data
+                    metricsData
                 ]);
+
+                setRequestHistory(requestData);
 
                 setError(null);
             } catch {
@@ -58,6 +68,7 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
             value={{
                 metrics,
                 metricsHistory,
+                requestHistory,
                 loading,
                 error
             }}

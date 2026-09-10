@@ -10,6 +10,14 @@ export interface Metrics {
     workers: number;
 }
 
+export interface RequestHistoryEntry {
+    time: string;
+    method: string;
+    path: string;
+    status: number;
+    duration_ms: number;
+}
+
 export interface User {
     id: number;
     name: string;
