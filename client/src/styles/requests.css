@@ -1,0 +1,215 @@
+.requests-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-7);
+}
+
+/* ---------------------------------
+   Page Header
+--------------------------------- */
+
+.requests-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.requests-page-header h1 {
+    margin-top: var(--space-2);
+}
+
+.requests-page-header p {
+    margin-top: var(--space-3);
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* ---------------------------------
+   Overview
+--------------------------------- */
+
+.requests-overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+}
+
+.request-stat {
+    padding: var(--space-5);
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-md);
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.request-stat:hover {
+    background: var(--bg-panel-hover);
+    border-color: var(--border-light);
+}
+
+.request-stat-label {
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+}
+
+.request-stat strong {
+    display: block;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 600;
+}
+
+/* ---------------------------------
+   Request Log
+--------------------------------- */
+
+.requests-table-section {
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.requests-section-header {
+    padding: var(--space-5) var(--space-6);
+    border-bottom: var(--border-width) solid var(--border);
+}
+
+.requests-section-header h2 {
+    margin-top: var(--space-2);
+}
+
+/* ---------------------------------
+   Table
+--------------------------------- */
+
+.requests-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.requests-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.requests-table-wrapper th {
+    padding: var(--space-3) var(--space-6);
+    color: var(--text-muted);
+    background: var(--bg);
+    border-bottom: var(--border-width) solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.requests-table-wrapper td {
+    padding: var(--space-4) var(--space-6);
+    border-bottom: var(--border-width) solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.requests-table-wrapper tbody tr {
+    transition: background var(--transition-fast);
+}
+
+.requests-table-wrapper tbody tr:hover {
+    background: var(--bg-panel-hover);
+}
+
+.requests-table-wrapper tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Method */
+
+.requests-table-wrapper td:nth-child(2) {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Path */
+
+.requests-table-wrapper td:nth-child(3) {
+    color: var(--text);
+}
+
+/* Status */
+
+.requests-table-wrapper td:nth-child(4) {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.request-error {
+    color: var(--error) !important;
+}
+
+/* Duration */
+
+.requests-table-wrapper td:nth-child(5) {
+    color: var(--text-secondary);
+}
+
+/* ---------------------------------
+   Empty State
+--------------------------------- */
+
+.requests-empty {
+    padding: var(--space-8);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-align: center;
+}
+
+/* ---------------------------------
+   Responsive
+--------------------------------- */
+
+@media (max-width: 1024px) {
+    .requests-page {
+        padding: var(--space-6);
+    }
+
+    .requests-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .requests-page {
+        gap: var(--space-6);
+        padding: var(--space-4);
+    }
+
+    .requests-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .requests-table-wrapper th,
+    .requests-table-wrapper td {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+    }
+}
