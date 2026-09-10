@@ -1,0 +1,43 @@
+.line-graph {
+    margin-top: var(--space-7);
+
+    padding: var(--space-6);
+
+    background: var(--bg-panel);
+    border: var(--border-width) solid var(--border);
+}
+
+.line-graph-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: var(--space-6);
+}
+
+.line-graph-header h2 {
+    margin-top: var(--space-2);
+}
+
+.line-graph-header select {
+    padding: 8px 10px;
+
+    color: var(--text-secondary);
+    background: var(--bg-panel);
+
+    border: 1px solid var(--border);
+
+    font-family: var(--mono);
+    font-size: 11px;
+
+    outline: none;
+}
+
+.line-graph-header select:focus {
+    border-color: var(--accent);
+}
+
+.line-graph-chart {
+    position: relative;
+    height: 300px;
+}

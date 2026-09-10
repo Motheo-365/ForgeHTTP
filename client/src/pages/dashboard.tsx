@@ -1,38 +1,27 @@
-import { useEffect, useState } from "react";
-
 import StatCard from "../components/statCard";
-import * as api from "../services/api";
-import type { Metrics } from "../types/api";
+import LineGraph from "../components/lineGraph";
+
+import { useMetrics } from "../context/metricsContext";
 
 import "../styles/dashboard.css";
 
 function Dashboard() {
-    const [metrics, setMetrics] = useState<Metrics | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        async function loadMetrics() {
-            try {
-                const data = await api.getMetrics();
-                setMetrics(data);
-                setError(null);
-            } catch {
-                setError("Unable to retrieve server metrics.");
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadMetrics();
-    }, []);
+    const {
+        metrics,
+        loading,
+        error
+    } = useMetrics();
 
     return (
         <div className="dashboard-page">
             <div className="page-header">
                 <div>
-                    <span className="page-label">SERVER / OVERVIEW</span>
+                    <span className="page-label">
+                        SERVER / OVERVIEW
+                    </span>
+
                     <h1>Dashboard</h1>
+
                     <p>
                         Real-time overview of the ForgeHTTP server.
                     </p>
@@ -85,6 +74,8 @@ function Dashboard() {
                             description="Thread pool workers"
                         />
                     </section>
+
+                    <LineGraph />
 
                     <section className="dashboard-section">
                         <div className="section-heading">

@@ -10,22 +10,26 @@ import Middleware from "./pages/middleware";
 import Metrics from "./pages/metrics";
 import Health from "./pages/health";
 import Configuration from "./pages/configuration";
+import { MetricsProvider } from "./context/metricsContext";
 
 function App() {
     return (
         <BrowserRouter>
-            <Routes>
-                <Route element={<Layout />}>
-                    <Route path="/" element={<Navigate to="/introduction" replace />} />                    <Route path="/introduction" element={<Introduction />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/requests" element={<Requests />} />
-                    <Route path="/routes" element={<RoutesPage />} />
-                    <Route path="/middleware" element={<Middleware />} />
-                    <Route path="/metrics" element={<Metrics />} />
-                    <Route path="/health" element={<Health />} />
-                    <Route path="/configuration" element={<Configuration />} />
-                </Route>
-            </Routes>
+            <MetricsProvider>
+                <Routes>
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Navigate to="/introduction" replace />} />                    <Route path="/introduction" element={<Introduction />} />
+                        <Route path="/introduction" element={<Introduction />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/requests" element={<Requests />} />
+                        <Route path="/routes" element={<RoutesPage />} />
+                        <Route path="/middleware" element={<Middleware />} />
+                        <Route path="/metrics" element={<Metrics />} />
+                        <Route path="/health" element={<Health />} />
+                        <Route path="/configuration" element={<Configuration />} />
+                    </Route>
+                </Routes>
+            </MetricsProvider>
         </BrowserRouter>
     );
 }
