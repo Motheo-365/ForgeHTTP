@@ -63,19 +63,58 @@ Socket Socket::accept() {
     return Socket(clientSocket);
 }
 
-std::string Socket::receive() {
-    char buffer[1024] = { 0 };
-    std::string message;
-    ssize_t bytesRead;
+void Socket::close() {
+    if (fileDescriptor != -1) {
+        ::close(fileDescriptor);
+        fileDescriptor = -1;
+    }
+}
 
-    while ((bytesRead = recv(fileDescriptor, buffer, sizeof(buffer), 0)) > 0) {
+std::string Socket::receive() {
+    char buffer[4096] = { 0 };
+    std::string message;
+    std::size_t expectedBodyLength = 0;
+    bool headersComplete = false;
+
+    while (true) {
+        const ssize_t bytesRead = recv(fileDescriptor, buffer, sizeof(buffer), 0);
+
+        if (bytesRead <= 0) {
+            if (bytesRead < 0) {
+                throw std::runtime_error("receive failed");
+            }
+            break;
+        }
+
         message.append(buffer, bytesRead);
 
-        if (bytesRead < static_cast<ssize_t>(sizeof buffer)) break;
-    }
+        const std::size_t headerEnd = message.find("\r\n\r\n");
+        const std::size_t alternateHeaderEnd = message.find("\n\n");
+        const std::size_t delimiterEnd = headerEnd != std::string::npos
+            ? headerEnd + 4
+            : alternateHeaderEnd != std::string::npos
+                ? alternateHeaderEnd + 2
+                : std::string::npos;
 
-    if (bytesRead < 0) {
-        throw std::runtime_error("receive failed");
+        if (delimiterEnd == std::string::npos) {
+            continue;
+        }
+
+        if (!headersComplete) {
+            headersComplete = true;
+            const std::string headers = message.substr(0, delimiterEnd);
+            const std::string marker = "Content-Length:";
+            const std::size_t contentLengthStart = headers.find(marker);
+
+            if (contentLengthStart != std::string::npos) {
+                const std::size_t valueStart = contentLengthStart + marker.size();
+                expectedBodyLength = std::stoul(headers.substr(valueStart));
+            }
+        }
+
+        if (message.size() >= delimiterEnd + expectedBodyLength) {
+            break;
+        }
     }
 
     return message;
@@ -103,7 +142,5 @@ void Socket::send(const std::string& data) {
 }
 
 Socket::~Socket() {
-    if (fileDescriptor != -1) {
-        close(fileDescriptor);
-    }
+    close();
 }

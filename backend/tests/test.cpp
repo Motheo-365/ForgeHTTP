@@ -8,6 +8,11 @@
 #include "Middleware/CorsMiddleware.h"
 #include "Middleware/AuthMiddleware.h"
 #include "Middleware/RateLimiterMiddleware.h"
+#include "Observability/ServerEvent.h"
+#include "Observability/EventObserver.h"
+#include "Observability/ServerEventPublisher.h"
+#include "Observability/Logger.h"
+#include "Observability/MetricsController.h"
 
 #include <exception>
 #include <iostream>
@@ -48,6 +53,8 @@ void testNetworking();
 void testHTTPParser();
 void testHTTPResponse();
 void testMiddleware();
+void testObservability();
+
 
 // --------------------------------------------------
 // Main Test Runner
@@ -61,6 +68,7 @@ int main() {
     testHTTPParser();
     testHTTPResponse();
     testMiddleware();
+    testObservability();
 
     std::cout
         << "\n=================== TEST SUMMARY =========================\n";
@@ -584,6 +592,375 @@ void testMiddleware() {
     catch (const std::exception& e) {
         fail(
             "Middleware objects can be created",
+            e.what()
+        );
+    }
+}
+
+// --------------------------------------------------
+// Observability Tests
+// --------------------------------------------------
+
+void testObservability() {
+
+    section("Observability");
+
+    // ----------------------------------------------
+    // ServerEventPublisher - Single Observer
+    // ----------------------------------------------
+
+    try {
+
+        class TestObserver : public EventObserver {
+
+        public:
+
+            bool eventReceived = false;
+
+            void onEvent(const ServerEvent& e) override {
+                eventReceived = true;
+            }
+        };
+
+        TestObserver observer;
+        ServerEventPublisher publisher;
+
+        publisher.subscribe(&observer);
+
+        ServerEvent event{
+            ServerEventType::ServerStarted,
+            std::chrono::system_clock::now()
+        };
+
+        publisher.publish(event);
+
+        if (observer.eventReceived) {
+            pass("Event publisher notifies subscribed observer");
+        }
+        else {
+            fail(
+                "Event publisher notifies subscribed observer"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Event publisher notifies subscribed observer",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // ServerEventPublisher - Multiple Observers
+    // ----------------------------------------------
+
+    try {
+
+        class TestObserver : public EventObserver {
+
+        public:
+
+            int eventCount = 0;
+
+            void onEvent(const ServerEvent& e) override {
+                ++eventCount;
+            }
+        };
+
+        TestObserver first;
+        TestObserver second;
+
+        ServerEventPublisher publisher;
+
+        publisher.subscribe(&first);
+        publisher.subscribe(&second);
+
+        ServerEvent event{
+            ServerEventType::ServerStarted,
+            std::chrono::system_clock::now()
+        };
+
+        publisher.publish(event);
+
+        if (first.eventCount == 1 && second.eventCount == 1) {
+            pass("Event publisher notifies multiple observers");
+        }
+        else {
+            fail(
+                "Event publisher notifies multiple observers"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Event publisher notifies multiple observers",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // MetricsController - Request Count
+    // ----------------------------------------------
+
+    try {
+
+        MetricsController metrics;
+
+        ServerEvent responseEvent{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/api/users",
+            200,
+            5.0
+        };
+
+        metrics.onEvent(responseEvent);
+        metrics.onEvent(responseEvent);
+
+        HttpResponse response = metrics.getMetrics();
+        std::string output = response.toString();
+
+        if (output.find("\"requests\": 2") != std::string::npos) {
+            pass("Metrics controller counts responses");
+        }
+        else {
+            fail(
+                "Metrics controller counts responses",
+                "Expected requests=2"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Metrics controller counts responses",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // MetricsController - Average Response Time
+    // ----------------------------------------------
+
+    try {
+
+        MetricsController metrics;
+
+        ServerEvent first{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/health",
+            200,
+            10.0
+        };
+
+        ServerEvent second{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/api/users",
+            200,
+            20.0
+        };
+
+        metrics.onEvent(first);
+        metrics.onEvent(second);
+
+        HttpResponse response = metrics.getMetrics();
+        std::string output = response.toString();
+
+        if (
+            output.find("\"average_response_time_ms\": 15") 
+            != std::string::npos
+        ) {
+            pass("Metrics controller calculates average response time");
+        }
+        else {
+            fail(
+                "Metrics controller calculates average response time",
+                "Expected average response time of 15ms"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Metrics controller calculates average response time",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // MetricsController - Error Count
+    // ----------------------------------------------
+
+    try {
+
+        MetricsController metrics;
+
+        ServerEvent success{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/health",
+            200,
+            5.0
+        };
+
+        ServerEvent notFound{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/missing",
+            404,
+            3.0
+        };
+
+        ServerEvent serverError{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/error",
+            500,
+            8.0
+        };
+
+        metrics.onEvent(success);
+        metrics.onEvent(notFound);
+        metrics.onEvent(serverError);
+
+        HttpResponse response = metrics.getMetrics();
+        std::string output = response.toString();
+
+        if (output.find("\"errors\": 2") != std::string::npos) {
+            pass("Metrics controller counts HTTP errors");
+        }
+        else {
+            fail(
+                "Metrics controller counts HTTP errors",
+                "Expected errors=2"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Metrics controller counts HTTP errors",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // MetricsController - Response
+    // ----------------------------------------------
+
+    try {
+
+        MetricsController metrics;
+
+        ServerEvent event{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "GET",
+            "/health",
+            200,
+            4.0
+        };
+
+        metrics.onEvent(event);
+
+        HttpResponse response = metrics.getMetrics();
+
+        if (response.getStatusCode() == 200) {
+            pass("Metrics endpoint returns HTTP 200");
+        }
+        else {
+            fail(
+                "Metrics endpoint returns HTTP 200",
+                "Expected status 200"
+            );
+        }
+
+        std::string output = response.toString();
+
+        if (
+            output.find("Content-Type: application/json")
+            != std::string::npos
+        ) {
+            pass("Metrics endpoint returns JSON");
+        }
+        else {
+            fail(
+                "Metrics endpoint returns JSON"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Metrics endpoint response",
+            e.what()
+        );
+    }
+
+
+    // ----------------------------------------------
+    // ServerEventPublisher - Metrics Integration
+    // ----------------------------------------------
+
+    try {
+
+        ServerEventPublisher publisher;
+        MetricsController metrics;
+
+        publisher.subscribe(&metrics);
+
+        ServerEvent event{
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            "POST",
+            "/api/users",
+            201,
+            7.0
+        };
+
+        publisher.publish(event);
+
+        HttpResponse response = metrics.getMetrics();
+        std::string output = response.toString();
+
+        if (
+            output.find("\"requests\": 1")
+            != std::string::npos
+        ) {
+            pass("Publisher integrates with MetricsController");
+        }
+        else {
+            fail(
+                "Publisher integrates with MetricsController"
+            );
+        }
+
+    }
+    catch (const std::exception& e) {
+
+        fail(
+            "Publisher integrates with MetricsController",
             e.what()
         );
     }

@@ -12,6 +12,5 @@ void Connection::write(const std::string& data) {
 }
 
 void Connection::close() {
-    // Re-assigning an empty Socket closes the old file descriptor via ~Socket()
-    socket = Socket(); 
+    socket.close();
 }

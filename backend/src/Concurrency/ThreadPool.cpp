@@ -9,6 +9,10 @@ ThreadPool::ThreadPool(int numThreads) : stopping(false) {
     }
 }
 
+ThreadPool::~ThreadPool() {
+    shutdown();
+}
+
 void ThreadPool::enqueue(std::function<void()> task) {
     if (stopping) return;
     queue.push(task);

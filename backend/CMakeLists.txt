@@ -71,11 +71,9 @@ target_include_directories(forge_tests PRIVATE
 # --------------------------------------------------
 
 if (MSVC)
-
     target_compile_options(forge PRIVATE /W4)
 
 else()
-
     target_compile_options(forge PRIVATE
         -Wall
         -Wextra

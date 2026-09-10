@@ -15,6 +15,7 @@ class ThreadPool {
             Constrcucts the TaskQueue, then constructs numThreads Worker objects, each backed by a real std::thread running WOrker::run();=.
         */
         ThreadPool(int numThreads);
+        ~ThreadPool();
 
         /*
             Pushes a unit of work (typically "handle this one connection") onto the shared TaskQueue for the next available worker to pick up.

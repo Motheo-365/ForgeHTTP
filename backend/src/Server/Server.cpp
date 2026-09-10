@@ -9,7 +9,25 @@
 #include <iostream>
 #include <memory>
 
-Server::Server() : pool(8){
+namespace {
+std::string methodName(HttpMethod method) {
+    switch (method) {
+        case HttpMethod::GET: return "GET";
+        case HttpMethod::POST: return "POST";
+        case HttpMethod::PUT: return "PUT";
+        case HttpMethod::DELETE: return "DELETE";
+        case HttpMethod::PATCH: return "PATCH";
+        case HttpMethod::OPTIONS: return "OPTIONS";
+    }
+
+    return "UNKNOWN";
+}
+}
+
+Server::Server() : pool(8), metricsCollector(8), rateLimiterMiddleware(100) {
+    events.subscribe(&logger);
+    events.subscribe(&metricsCollector);
+
     router.get("/health", [this](const HttpRequest& req) {
         return healthController.getHealth(req);
     });
@@ -21,6 +39,14 @@ Server::Server() : pool(8){
     router.post("/api/users", [this](const HttpRequest& req) {
         return userController.createUser(req);
     });
+
+    router.get("/metrics", [this](const HttpRequest&) {
+        return metricsCollector.getMetrics();
+    });
+}
+
+Server::~Server() {
+    stop();
 }
 
 void Server::start(int port) {
@@ -39,19 +65,39 @@ void Server::start(int port) {
     listenSocket.listen(10);
     running = true;
 
+    std::cout << "ForgeHTTP\n----------------------------------------\n";
     std::cout << "\nServer running on port " << port << '\n';
     std::cout << "Workers: 8\n\n";
+
+    events.publish({ServerEventType::ServerStarted, std::chrono::system_clock::now()});
 
     acceptConnections();
 }
 
 void Server::stop() {
+    const bool wasRunning = running;
     running = false;
+    listenSocket.close();
+    pool.shutdown();
+
+    if (wasRunning) {
+        events.publish({ServerEventType::ServerStopped, std::chrono::system_clock::now()});
+    }
 }
 
 void Server::acceptConnections() {
     while (running) {
-        Socket client = listenSocket.accept();
+        Socket client;
+
+        try {
+            client = listenSocket.accept();
+        }
+        catch (const std::exception&) {
+            if (!running) {
+                break;
+            }
+            throw;
+        }
 
         auto connection = std::make_shared<Connection>(std::move(client));
 
@@ -64,6 +110,8 @@ void Server::acceptConnections() {
 }
 
 void Server::handleConnection(Connection& c) {
+    const auto requestStarted = std::chrono::steady_clock::now();
+
     try {
         std::string rawRequest = c.read();
 
@@ -72,27 +120,55 @@ void Server::handleConnection(Connection& c) {
 
         HttpRequest request = HttpParser::parse(rawRequest);
 
+        events.publish({
+            ServerEventType::RequestReceived,
+            std::chrono::system_clock::now(),
+            methodName(request.getMethod()),
+            request.getPath()
+        });
+
         std::cout << "Parsed path: "
                   << request.getPath()
                   << '\n';
 
-        Route* route = router.match(request);
+        HttpResponse response;
+        auto endpoint = [&]() {
+            Route* route = router.match(request);
 
-        if (route == nullptr) {
-            HttpResponse response =
-                HttpResponse::text("Route not found");
+            if (route == nullptr) {
+                response = HttpResponse::text("Route not found");
+                response.setStatusCode(404);
+                return;
+            }
 
-            response.setStatusCode(404);
+            response = route->getHandler()(request);
+        };
 
-            c.write(response.toString());
-            c.close();
-            return;
-        }
-
-        HttpResponse response =
-            route->getHandler()(request);
+        corsMiddleware.handle(request, response, [&]() {
+            loggerMiddleware.handle(request, response, [&]() {
+                rateLimiterMiddleware.handle(request, response, [&]() {
+                    if (request.getPath().rfind("/api/", 0) == 0) {
+                        authMiddleware.handle(request, response, endpoint);
+                    }
+                    else {
+                        endpoint();
+                    }
+                });
+            });
+        });
 
         c.write(response.toString());
+
+        const auto elapsed = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - requestStarted).count();
+        events.publish({
+            ServerEventType::ResponseSent,
+            std::chrono::system_clock::now(),
+            methodName(request.getMethod()),
+            request.getPath(),
+            response.getStatusCode(),
+            elapsed
+        });
     }
 
     catch (const std::exception& e) {

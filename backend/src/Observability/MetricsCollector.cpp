@@ -2,12 +2,22 @@
 
 #include <sstream>
 
-void MetricsController::onEvent(const ServerEvent& e) {
+MetricsCollector::MetricsCollector(int workers) : workers(workers) {}
+
+void MetricsCollector::onEvent(const ServerEvent& e) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    if (e.type == ServerEventType::RequestReceived) {
+        activeConnections++;
+        return;
+    }
+
     if (e.type != ServerEventType::ResponseSent) {
         return;
     }
 
     requestCount++;
+    activeConnections--;
 
     avgResponse = ((avgResponse * (requestCount - 1)) + e.durationMs) / requestCount;
 
@@ -16,15 +26,16 @@ void MetricsController::onEvent(const ServerEvent& e) {
     }
 }
 
-HttpResponse MetricsController::getMetrics() {
+HttpResponse MetricsCollector::getMetrics() {
+    std::lock_guard<std::mutex> lock(mutex);
     std::ostringstream json;
 
     json << "{"
          << "\"requests\": " << requestCount << ","
-         << "\"active_connections\": 0,"
+         << "\"active_connections\": " << activeConnections << ","
          << "\"average_response_time_ms\": " << avgResponse << ","
          << "\"errors\": " << errorCount << ","
-         << "\"workers\": 0"
+         << "\"workers\": " << workers
          << "}";
 
     return HttpResponse::json(json.str());

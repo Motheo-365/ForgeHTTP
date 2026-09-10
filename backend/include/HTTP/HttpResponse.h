@@ -43,7 +43,7 @@ class HttpResponse {
        int getStatusCode();
 
     private:
-        int statusCode;
+        int statusCode = 200;
         std::map<std::string, std::string> headers;
         std::string body;
 };

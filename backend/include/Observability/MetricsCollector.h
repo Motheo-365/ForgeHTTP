@@ -1,13 +1,16 @@
-#ifndef METRICSCONTROLLER_H
-#define METRICSCONTROLLER_H
+#ifndef METRICSCOLLECTOR_H
+#define METRICSCOLLECTOR_H
 
-#include "HttpResponse.h"
+#include "HTTP/HttpResponse.h"
 #include "ServerEvent.h"
 #include "EventObserver.h"
+#include <mutex>
 
 // An EventObserver that aggreagtes counts and timings, exposed via /metrics.
-class MetricsController : public EventObserver {
+class MetricsCollector : public EventObserver {
     public:
+    explicit MetricsCollector(int workers = 0);
+
         /*
             Increments requestCount,
             updates the running average response time,
@@ -34,6 +37,11 @@ class MetricsController : public EventObserver {
         int requestCount = 0;
         double avgResponse = 0.0;
         int errorCount = 0;
+        int activeConnections = 0;
+        int workers = 0;
+        mutable std::mutex mutex;
 };
+
+using MetricsController = MetricsCollector;
 
 #endif

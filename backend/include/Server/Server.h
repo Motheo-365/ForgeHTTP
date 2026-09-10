@@ -7,6 +7,13 @@
 #include "Routing/Router.h"
 #include "Controllers/HealthController.h"
 #include "Controllers/UserController.h"
+#include "Middleware/CorsMiddleware.h"
+#include "Middleware/AuthMiddleware.h"
+#include "Middleware/LoggerMiddleware.h"
+#include "Middleware/RateLimiterMiddleware.h"
+#include "Observability/Logger.h"
+#include "Observability/MetricsCollector.h"
+#include "Observability/ServerEventPublisher.h"
 
 #include <utility>
 
@@ -16,6 +23,7 @@
 class Server {
     public:
         Server();
+        ~Server();
 
         /*
             Binds and listens on the given port (falling back to the PORT environment variable when no port is passed), then enters the accept loop.
@@ -35,8 +43,13 @@ class Server {
         Router router;
         HealthController healthController;
         UserController userController;
-        // Middleware* middlewareChain;
-        // ServerEventPublisher events;
+        CorsMiddleware corsMiddleware;
+        LoggerMiddleware loggerMiddleware;
+        AuthMiddleware authMiddleware;
+        RateLimiterMiddleware rateLimiterMiddleware;
+        Logger logger;
+        MetricsCollector metricsCollector;
+        ServerEventPublisher events;
 
         bool running = false;
         

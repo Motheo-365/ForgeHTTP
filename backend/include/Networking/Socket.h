@@ -48,6 +48,9 @@ class Socket {
         */
         Socket accept();
 
+        // Closes the descriptor and makes this socket empty.
+        void close();
+
         /*
             reads available bytes to the socket.
             Loops on recv() to handle writes, since a single call is not guaranteed to send the whole buffer.

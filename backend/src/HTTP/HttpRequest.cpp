@@ -63,5 +63,5 @@ std::string HttpRequest::getBody() const {
 }
 
 std::string HttpRequest::getClientAddress() const {
-    return body;
+    return clientAddress;
 }

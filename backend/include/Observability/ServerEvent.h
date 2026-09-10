@@ -12,16 +12,16 @@ enum class ServerEventType {
 };
 
 struct ServerEvent {
-    ServerEventType type;
+    ServerEventType type = ServerEventType::RequestReceived;
 
     std::chrono::system_clock::time_point timestamp;
 
     std::string method;
     std::string path;
 
-    int statusCode;
+    int statusCode = 0;
 
-    double durationMs;
+    double durationMs = 0.0;
 };
 
 #endif

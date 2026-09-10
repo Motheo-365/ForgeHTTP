@@ -60,6 +60,10 @@ std::string HttpResponse::toString() const {
         statusMessage = "Too Many Requests";
     }
 
+    else if (statusCode == 204) {
+        statusMessage = "No Content";
+    }
+
     else if (statusCode == 500) {
         statusMessage = "Internal Server Error";
     }

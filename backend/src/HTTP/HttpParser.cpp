@@ -39,6 +39,10 @@ HttpRequest HttpParser::parse(const std::string& raw) {
         request.method = HttpMethod::PATCH;
     }
 
+    else if (method == "OPTIONS") {
+        request.method = HttpMethod::OPTIONS;
+    }
+
     else {
         throw std::runtime_error("Unsupported HTTP method");
     }
@@ -76,6 +80,11 @@ HttpRequest HttpParser::parse(const std::string& raw) {
     }
 
     request.headers = parseHeaders(headerData);
+    request.clientAddress = request.getHeader("X-Forwarded-For");
+
+    if (request.clientAddress.empty()) {
+        request.clientAddress = request.getHeader("Host");
+    }
 
     // Read body
     std::string body;
