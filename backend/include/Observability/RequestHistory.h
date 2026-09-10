@@ -12,7 +12,7 @@ class RequestHistory : public EventObserver {
 public:
     explicit RequestHistory(std::size_t maxEntries = 100);
     void onEvent(const ServerEvent& event) override;
-    HttpResponse getRequests(std::size_t limit = 10);
+    HttpResponse getRequests(std::size_t limit = 100);
     void setMaxEntries(std::size_t maxEntries);
 
 private:
