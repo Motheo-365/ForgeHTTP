@@ -23,7 +23,7 @@ class Middleware{
         Middleware* setNext(Middleware* m);
 
     private:
-        Middleware* next;
+        Middleware* next = nullptr;
 };
 
 #endif
