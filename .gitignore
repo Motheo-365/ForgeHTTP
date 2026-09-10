@@ -16,9 +16,12 @@ install_manifest.txt
 *.o
 *.obj
 
-#image files
+# Image files
 *.jpg
 *.jpeg
+
+# Other files
+*.pptx
 
 # Node.js dependencies
 node_modules/
