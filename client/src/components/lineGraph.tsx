@@ -52,12 +52,23 @@ function LineGraph() {
                     legend: {
                         display: true,
                     },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                return items[0]?.label ?? "";
+                            },
+                            label: (item) => {
+                                return `Request ${item.raw}`;
+                            },
+                        },
+                    },
                 },
 
                 scales: {
                     x: {
                         ticks: {
-                            autoSkip: false,
+                            autoSkip: true,
+                            maxTicksLimit: 8,
                             maxRotation: 45,
                             minRotation: 45,
                         },

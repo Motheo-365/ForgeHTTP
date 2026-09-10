@@ -5,7 +5,7 @@ import "../styles/metrics.css";
 function Metrics() {
     const {
         metrics,
-        metricsHistory,
+        requestHistory,
         loading,
         error
     } = useMetrics();
@@ -30,12 +30,14 @@ function Metrics() {
         );
     }
 
-    const responseTimes = metricsHistory.map(
-        (entry) => entry.average_response_time_ms
+    const chronologicalRequests = [...requestHistory].reverse();
+
+    const responseTimes = chronologicalRequests.map(
+        (entry) => entry.duration_ms
     );
 
-    const requests = metricsHistory.map(
-        (entry) => entry.requests
+    const requests = chronologicalRequests.map(
+        (_, index) => index + 1
     );
 
     const maxResponseTime = Math.max(
@@ -81,11 +83,11 @@ function Metrics() {
     );
 
     const formatTime = (index: number): string => {
-        if (!metricsHistory[index]) {
+        if (!chronologicalRequests[index]) {
             return "";
         }
 
-        return metricsHistory[index].time;
+        return chronologicalRequests[index].time;
     };
 
     return (
@@ -135,12 +137,12 @@ function Metrics() {
                         </div>
 
                         <span className="metrics-chart-meta">
-                            {metricsHistory.length} samples
+                            {requestHistory.length} requests
                         </span>
                     </div>
 
                     <div className="metrics-chart">
-                        {metricsHistory.length < 2 ? (
+                        {requestHistory.length < 2 ? (
 
                             <div className="metrics-chart-empty">
                                 COLLECTING PERFORMANCE DATA...
@@ -204,7 +206,7 @@ function Metrics() {
                                         <span>
                                             {formatTime(
                                                 Math.floor(
-                                                    (metricsHistory.length - 1) /
+                                                    (requestHistory.length - 1) /
                                                     2
                                                 )
                                             )}
@@ -212,7 +214,7 @@ function Metrics() {
 
                                         <span>
                                             {formatTime(
-                                                metricsHistory.length - 1
+                                                requestHistory.length - 1
                                             )}
                                         </span>
 
@@ -246,12 +248,12 @@ function Metrics() {
                         </div>
 
                         <span className="metrics-chart-meta">
-                            {metricsHistory.length} samples
+                            {requestHistory.length} requests
                         </span>
                     </div>
 
                     <div className="metrics-chart">
-                        {metricsHistory.length < 2 ? (
+                        {requestHistory.length < 2 ? (
                             <div className="metrics-chart-empty">
                                 COLLECTING REQUEST DATA...
                             </div>
@@ -316,7 +318,7 @@ function Metrics() {
                                         <span>
                                             {formatTime(
                                                 Math.floor(
-                                                    (metricsHistory.length - 1) /
+                                                    (requestHistory.length - 1) /
                                                     2
                                                 )
                                             )}
@@ -324,7 +326,7 @@ function Metrics() {
 
                                         <span>
                                             {formatTime(
-                                                metricsHistory.length - 1
+                                                requestHistory.length - 1
                                             )}
                                         </span>
                                     </div>
