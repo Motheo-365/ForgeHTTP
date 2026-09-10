@@ -1,6 +1,7 @@
 import {
     createContext,
     useContext,
+    useCallback,
     useEffect,
     useState,
     type ReactNode
@@ -19,6 +20,7 @@ interface MetricsContextType {
     requestHistory: RequestHistoryEntry[];
     loading: boolean;
     error: string | null;
+    refreshMetrics: () => Promise<void>;
 }
 
 const MetricsContext = createContext<MetricsContextType | undefined>(
@@ -32,42 +34,41 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        async function loadMetrics() {
-            try {
-                const [metricsData, requestData] = await Promise.all([
-                    api.getMetrics(true),
-                    api.getRequestHistory(true)
-                ]);
+    const refreshMetrics = useCallback(async (): Promise<void> => {
+        try {
+            const [metricsData, requestData] = await Promise.all([
+                api.getMetrics(true),
+                api.getRequestHistory(true)
+            ]);
 
-                setMetrics(metricsData);
+            setMetrics(metricsData);
 
-                const sample: MetricsSample = {
-                    ...metricsData,
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit"
-                    })
-                };
+            const sample: MetricsSample = {
+                ...metricsData,
+                time: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                })
+            };
 
-                setMetricsHistory((previous) => [
-                    ...previous,
-                    sample
-                ]);
+            setMetricsHistory((previous) => [
+                ...previous,
+                sample
+            ]);
 
-                setRequestHistory(requestData);
-
-                setError(null);
-            } catch {
-                setError("Unable to retrieve server metrics.");
-            } finally {
-                setLoading(false);
-            }
+            setRequestHistory(requestData);
+            setError(null);
+        } catch {
+            setError("Unable to retrieve server metrics.");
+        } finally {
+            setLoading(false);
         }
-
-        loadMetrics();
     }, []);
+
+    useEffect(() => {
+        refreshMetrics();
+    }, [refreshMetrics]);
 
     return (
         <MetricsContext.Provider
@@ -76,7 +77,8 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
                 metricsHistory,
                 requestHistory,
                 loading,
-                error
+                error,
+                refreshMetrics
             }}
         >
             {children}
