@@ -3,6 +3,7 @@
 
     background: var(--bg-panel);
     border: var(--border-width) solid var(--border);
+
 }
 
 .request-table-header {
@@ -41,6 +42,7 @@
     width: 100%;
     overflow-x: auto;
     overflow-y: scroll;
+    max-height: 400px;
 }
 
 .request-table table {

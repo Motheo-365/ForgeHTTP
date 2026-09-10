@@ -1,3 +1,4 @@
+import StatCard from "../components/statCard";
 import "../styles/routes.css";
 
 function RoutesPage() {
@@ -59,29 +60,9 @@ function RoutesPage() {
             </header>
 
             <section className="routes-overview">
-                <div className="route-stat">
-                    <span className="route-stat-label">
-                        TOTAL ROUTES
-                    </span>
-
-                    <strong>{routes.length}</strong>
-                </div>
-
-                <div className="route-stat route-stat-success">
-                    <span className="route-stat-label">
-                        PUBLIC
-                    </span>
-
-                    <strong>{publicRoutes}</strong>
-                </div>
-
-                <div className="route-stat route-stat-protected">
-                    <span className="route-stat-label">
-                        PROTECTED
-                    </span>
-
-                    <strong>{protectedRoutes}</strong>
-                </div>
+                <StatCard label="TOTAL ROUTES" value={routes.length} />
+                <StatCard label="PUBLIC" value={publicRoutes} />
+                <StatCard label="PROTECTED" value={protectedRoutes} />
             </section>
 
             <section className="routes-table-section">

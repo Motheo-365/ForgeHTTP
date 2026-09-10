@@ -1,9 +1,10 @@
 import { useMetrics } from "../context/metricsContext";
+import StatCard from "../components/statCard";
 
 import "../styles/requests.css";
 
 function Requests() {
-    const { requestHistory } = useMetrics();
+    const { requestHistory, metrics } = useMetrics();
 
     const totalRequests = requestHistory.length;
 
@@ -41,37 +42,15 @@ function Requests() {
             </header>
 
             <section className="requests-overview">
-                <div className="request-stat">
-                    <span className="request-stat-label">
-                        TOTAL REQUESTS
-                    </span>
+                <StatCard
+                    label="TOTAL REQUESTS"
+                    value={(metrics?.requests ?? totalRequests).toLocaleString()}
+                    description="Requests received"
+                />
 
-                    <strong>{totalRequests}</strong>
-                </div>
-
-                <div className="request-stat request-stat-success">
-                    <span className="request-stat-label">
-                        SUCCESSFUL
-                    </span>
-
-                    <strong>{successfulRequests}</strong>
-                </div>
-
-                <div className="request-stat reques-stat-warning">
-                    <span className="request-stat-label">
-                        CLIENT ERRORS
-                    </span>
-
-                    <strong>{clientErrors}</strong>
-                </div>
-
-                <div className="request-stat request-stat-error">
-                    <span className="request-stat-label">
-                        SERVER ERRORS
-                    </span>
-
-                    <strong>{serverErrors}</strong>
-                </div>
+                <StatCard label="SUCCESSFUL" value={successfulRequests} />
+                <StatCard label="CLIENT ERRORS" value={clientErrors} />
+                <StatCard label="SERVER ERRORS" value={serverErrors} />
             </section>
 
             <section className="requests-table-section">

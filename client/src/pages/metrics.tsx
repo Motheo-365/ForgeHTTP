@@ -1,4 +1,5 @@
 import { useMetrics } from "../context/metricsContext";
+import StatCard from "../components/statCard";
 import "../styles/metrics.css";
 
 function Metrics() {
@@ -109,59 +110,14 @@ function Metrics() {
             </header>
 
             <section className="metrics-overview">
-                <div className="metric-stat">
-                    <span className="metric-stat-label">
-                        REQUESTS
-                    </span>
-
-                    <strong>
-                        {metrics?.requests ?? 0}
-                    </strong>
-                </div>
-
-                <div className="metric-stat">
-                    <span className="metric-stat-label">
-                        ACTIVE CONNECTIONS
-                    </span>
-
-                    <strong>
-                        {metrics?.active_connections ?? 0}
-                    </strong>
-                </div>
-
-                <div className="metric-stat metric-stat-response">
-                    <span className="metric-stat-label">
-                        AVG RESPONSE TIME
-                    </span>
-
-                    <strong>
-                        {(
-                            metrics?.average_response_time_ms ?? 0
-                        ).toFixed(2)}
-
-                        <small> ms</small>
-                    </strong>
-                </div>
-
-                <div className="metric-stat metric-stat-error">
-                    <span className="metric-stat-label">
-                        ERRORS
-                    </span>
-
-                    <strong>
-                        {metrics?.errors ?? 0}
-                    </strong>
-                </div>
-
-                <div className="metric-stat">
-                    <span className="metric-stat-label">
-                        WORKERS
-                    </span>
-
-                    <strong>
-                        {metrics?.workers ?? 0}
-                    </strong>
-                </div>
+                <StatCard label="REQUESTS" value={metrics?.requests ?? 0} />
+                <StatCard label="ACTIVE CONNECTIONS" value={metrics?.active_connections ?? 0} />
+                <StatCard
+                    label="AVG RESPONSE TIME"
+                    value={`${(metrics?.average_response_time_ms ?? 0).toFixed(2)} ms`}
+                />
+                <StatCard label="ERRORS" value={metrics?.errors ?? 0} />
+                <StatCard label="WORKERS" value={metrics?.workers ?? 0} />
             </section>
 
             <section className="metrics-charts-grid">
@@ -401,46 +357,11 @@ function Metrics() {
                 </div>
 
                 <div className="runtime-grid">
-                    <div className="runtime-item">
-                        <span>
-                            REQUEST COUNT
-                        </span>
-
-                        <strong>
-                            {metrics?.requests ?? 0}
-                        </strong>
-                    </div>
-
-                    <div className="runtime-item">
-                        <span>
-                            ACTIVE CONNECTIONS
-                        </span>
-
-                        <strong>
-                            {metrics?.active_connections ?? 0}
-                        </strong>
-                    </div>
-
-                    <div className="runtime-item">
-                        <span>
-                            WORKER THREADS
-                        </span>
-
-                        <strong>
-                            {metrics?.workers ?? 0}
-                        </strong>
-                    </div>
-
-
-                    <div className="runtime-item">
-                        <span>
-                            ERROR COUNT
-                        </span>
-
-                        <strong>
-                            {metrics?.errors ?? 0}
-                        </strong>
-                    </div>                </div>
+                    <StatCard label="REQUEST COUNT" value={metrics?.requests ?? 0} />
+                    <StatCard label="ACTIVE CONNECTIONS" value={metrics?.active_connections ?? 0} />
+                    <StatCard label="WORKER THREADS" value={metrics?.workers ?? 0} />
+                    <StatCard label="ERROR COUNT" value={metrics?.errors ?? 0} />
+                </div>
             </section>
         </main>
     );

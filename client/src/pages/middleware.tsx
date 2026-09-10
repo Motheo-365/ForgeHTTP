@@ -1,3 +1,4 @@
+import StatCard from "../components/statCard";
 import "../styles/middleware.css";
 
 function Middleware() {
@@ -42,27 +43,11 @@ function Middleware() {
             </header>
 
             <section className="middleware-overview">
-                <div className="middleware-stat">
-                    <span className="middleware-stat-label">
-                        TOTAL MIDDLEWARE
-                    </span>
-
-                    <strong>{middleware.length}</strong>
-                </div>
-
-                <div className="middleware-stat middleware-stat-active">
-                    <span className="middleware-stat-label">
-                        ACTIVE
-                    </span>
-
-                    <strong>
-                        {
-                            middleware.filter(
-                                (item) => item.status === "ACTIVE"
-                            ).length
-                        }
-                    </strong>
-                </div>
+                <StatCard label="TOTAL MIDDLEWARE" value={middleware.length} />
+                <StatCard
+                    label="ACTIVE"
+                    value={middleware.filter((item) => item.status === "ACTIVE").length}
+                />
             </section>
 
             <section className="middleware-pipeline">

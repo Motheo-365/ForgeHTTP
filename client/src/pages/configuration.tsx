@@ -178,7 +178,7 @@ function Configuration() {
                         <h2>Server configuration</h2>
                     </div>
 
-                    <a href="#instructions">CONFIGURATION GUIDE</a>
+                    <a href="#instructions"><i>READ THIS BEFORE YOU START</i></a>
                 </div>
 
                 <div className="configuration-grid">

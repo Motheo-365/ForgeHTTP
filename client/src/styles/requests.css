@@ -98,6 +98,8 @@
 .requests-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    overflow-y: scroll;
+    max-height: 400px;
 }
 
 .requests-table-wrapper table {

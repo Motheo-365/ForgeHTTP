@@ -4,6 +4,7 @@ import type { HealthResponse } from "../types/api";
 
 import { getHealth } from "../services/api";
 import { useMetrics } from "../context/metricsContext";
+import StatCard from "../components/statCard";
 
 
 import "../styles/health.css";
@@ -217,35 +218,13 @@ function Health() {
                 </div>
 
                 <div className="health-runtime-grid">
-                    <div className="health-runtime-item">
-                        <span>WORKER THREADS</span>
-                        <strong>
-                            {metrics?.workers ?? "--"}
-                        </strong>
-                    </div>
-
-                    <div className="health-runtime-item">
-                        <span>ACTIVE CONNECTIONS</span>
-                        <strong>
-                            {metrics?.active_connections ?? "--"}
-                        </strong>
-                    </div>
-
-                    <div className="health-runtime-item">
-                        <span>TOTAL REQUESTS</span>
-                        <strong>
-                            {metrics?.requests ?? "--"}
-                        </strong>
-                    </div>
-
-                    <div className="health-runtime-item">
-                        <span>AVG RESPONSE TIME</span>
-                        <strong>
-                            {metrics
-                                ? `${metrics.average_response_time_ms.toFixed(2)} ms`
-                                : "--"}
-                        </strong>
-                    </div>
+                    <StatCard label="WORKER THREADS" value={metrics?.workers ?? "--"} />
+                    <StatCard label="ACTIVE CONNECTIONS" value={metrics?.active_connections ?? "--"} />
+                    <StatCard label="TOTAL REQUESTS" value={metrics?.requests ?? "--"} />
+                    <StatCard
+                        label="AVG RESPONSE TIME"
+                        value={metrics ? `${metrics.average_response_time_ms.toFixed(2)} ms` : "--"}
+                    />
                 </div>
             </section>
 
