@@ -21,27 +21,26 @@ The project focuses on building a practical, modular HTTP server while applying 
 - HTTP status codes
 - Request headers
 - Query parameters
+- Request bodies with `Content-Length`
+- `OPTIONS` and CORS preflight handling
 
 ### Routing
 
 ForgeHTTP provides a simple routing system for registering HTTP handlers:
 
-- `GET`
-- `POST`
-- `PUT`
-- `DELETE`
+- `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, and `OPTIONS`
 
 Example:
 
 ```cpp
-router.get("/health", [](HttpRequest& req, HttpResponse& res) {
-    res = HttpResponse::json("{\"status\":\"ok\"}");
+router.get("/health", [](const HttpRequest& req) {
+   return HttpResponse::json("{\"status\":\"ok\"}");
 });
 ```
 
 ### Middleware
 
-Requests can pass through a configurable middleware chain before reaching the router.
+Requests pass through the server's middleware pipeline before reaching the router.
 
 Current middleware includes:
 
@@ -79,10 +78,10 @@ HTTP Parser
    ▼
 Middleware Chain
    │
-   ├── Logger
    ├── CORS
-   ├── Authentication
-   └── Rate Limiter
+   ├── Logger
+   ├── Rate Limiter
+   └── Authentication for /api/*
    │
    ▼
 Router
@@ -109,6 +108,8 @@ This separation allows individual components to be developed and tested independ
 | CMake | Build system |
 | POSIX Sockets | TCP networking |
 | HTTP/1.1 | Application protocol |
+| nlohmann/json | JSON parsing and serialization |
+| CMake test executable | Backend regression tests |
 | Git/GitHub | Version control |
 | React | Web dashboard |
 
@@ -118,49 +119,29 @@ This separation allows individual components to be developed and tested independ
 
 ```text
 ForgeHTTP/
-│
+├── README.md
 ├── backend/
+│   ├── CMakeLists.txt
+│   ├── Dockerfile
+│   ├── PLAN.md
 │   ├── include/
 │   │   ├── HTTP/
-│   │   │   ├── HttpMethod.h
-│   │   │   ├── HttpParser.h
-│   │   │   ├── HttpRequest.h
-│   │   │   └── HttpResponse.h
-│   │   │
 │   │   ├── Middleware/
-│   │   │   ├── Middleware.h
-│   │   │   ├── LoggerMiddleware.h
-│   │   │   ├── CorsMiddleware.h
-│   │   │   ├── AuthMiddleware.h
-│   │   │   └── RateLimiterMiddleware.h
-│   │   │
 │   │   ├── Networking/
-│   │   │   └── Socket.h
-│   │   │
+│   │   ├── Observability/
 │   │   ├── Routing/
-│   │   │   └── Router.h
-│   │   │
 │   │   └── Server/
-│   │       └── Server.h
-│   │
 │   ├── src/
 │   │   ├── HTTP/
 │   │   ├── Middleware/
 │   │   ├── Networking/
+│   │   ├── Observability/
 │   │   ├── Routing/
-│   │   └── Server/
-│   │
-│   └── main.cpp
-│
-├── frontend/
-│   └── ...
-│
-├── tests/
-│   └── ...
-│
-├── CMakeLists.txt
-├── PLAN.md
-└── README.md
+│   │   ├── Server/
+│   │   └── main.cpp
+│   └── tests/test.cpp
+└── client/
+   └── React dashboard
 ```
 
 ---
@@ -171,7 +152,7 @@ ForgeHTTP/
 
 - Linux / WSL
 - C++20-compatible compiler
-- CMake 3.16+
+- CMake 3.20+
 - Git
 
 ### Clone the repository
@@ -199,7 +180,17 @@ cmake --build backend/build
 ./backend/build/forge
 ```
 
-The server starts on the configured port.
+The server listens on port `8085` by default. Set `PORT` to use another port:
+
+```bash
+PORT=8086 ./backend/build/forge
+```
+
+Run the backend tests with:
+
+```bash
+./backend/build/forge_tests
+```
 
 ---
 
@@ -226,6 +217,7 @@ Content-Type: application/json
 ```http
 GET /api/users HTTP/1.1
 Host: localhost:8086
+Authorization: Bearer test-token
 ```
 
 Example response:
@@ -243,12 +235,15 @@ Example response:
 ]
 ```
 
+`/api/users` requires a non-empty `Authorization` header. Requests without one receive `401 Unauthorized`.
+
 ### Create User
 
 ```http
 POST /api/users HTTP/1.1
 Host: localhost:8086
 Content-Type: application/json
+Authorization: Bearer test-token
 ```
 
 Example request body:
@@ -264,6 +259,14 @@ Response:
 ```http
 HTTP/1.1 201 Created
 ```
+
+### Metrics
+
+```bash
+curl http://localhost:8086/metrics
+```
+
+The response includes request count, active connections, average response time, error count, and worker count.
 
 ---
 
@@ -295,10 +298,10 @@ For example:
 Request
    │
    ▼
-Logger
+CORS
    │
    ▼
-CORS
+Logger
    │
    ▼
 Authentication
@@ -367,6 +370,10 @@ Responsible for mapping an HTTP request to an application handler.
 
 Coordinates the networking, HTTP, middleware, and routing components.
 
+### Observability Layer
+
+`ServerEventPublisher` publishes lifecycle and request events to `Logger` and `MetricsCollector`. The metrics snapshot is available at `/metrics`.
+
 ---
 
 ## Design Patterns
@@ -405,8 +412,9 @@ Current development areas include:
 - Server architecture
 - Concurrent request handling
 - React-based administration dashboard
-- Improved error handling
-- Additional HTTP functionality
+- Static file serving
+- Stronger authentication and configurable rate-limit windows
+- More complete HTTP/1.1 behavior, including keep-alive and chunked bodies
 
 ---
 
@@ -434,7 +442,7 @@ The result is a project that demonstrates both **low-level C++ development** and
 
 🚧 **Active Development**
 
-The core HTTP server, request parsing, responses, routing, and initial middleware architecture are implemented. Additional functionality and the web dashboard are currently being developed.
+The backend builds and runs with concurrent request handling, routing, middleware, JSON API endpoints, lifecycle events, and metrics. The React dashboard and broader HTTP functionality are still under development.
 
 ---
 
