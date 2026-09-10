@@ -6,7 +6,10 @@ void CorsMiddleware::handle(HttpRequest& req, HttpResponse& res, std::function<v
     if (req.getMethod() == HttpMethod::OPTIONS) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization, X-ForgeHTTP-Internal"
+        );
         res.setStatusCode(204);
         return;
     }
@@ -15,6 +18,9 @@ void CorsMiddleware::handle(HttpRequest& req, HttpResponse& res, std::function<v
 
     // CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTOINS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, X-ForgeHTTP-Internal"
+    );
 }
