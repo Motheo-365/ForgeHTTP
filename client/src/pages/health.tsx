@@ -34,10 +34,6 @@ function Health() {
 
     useEffect(() => {
         checkHealth();
-
-        const interval = setInterval(checkHealth, 5000);
-
-        return () => clearInterval(interval);
     }, []);
 
     const serverHealthy =

@@ -2,63 +2,16 @@ import { useEffect, useRef, useState } from "react";
 
 import Chart from "chart.js/auto";
 
-import * as api from "../services/api";
-
-import type { Metrics } from "../types/api";
+import { useMetrics } from "../context/metricsContext";
 
 import "../styles/lineGraph.css";
-
-const STORAGE_KEY = "forgehttp_metrics_history";
 
 function LineGraph() {
     const chartRef = useRef<HTMLCanvasElement | null>(null);
     const chartInstance = useRef<Chart | null>(null);
-
-    const [metricsHistory, setMetricsHistory] = useState<Metrics[]>(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-
-        if (!stored) {
-            return [];
-        }
-
-        try {
-            return JSON.parse(stored);
-        } catch {
-            return [];
-        }
-    });
+    const { requestHistory } = useMetrics();
 
     const [sampleCount, setSampleCount] = useState(20);
-
-    /*
-     * Collect metrics every 5 seconds.
-     */
-    useEffect(() => {
-        async function loadMetrics() {
-            try {
-                const metrics = await api.getMetrics();
-
-                setMetricsHistory((previous) => {
-                    const updated = [...previous, metrics];
-
-                    localStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(updated)
-                    );
-
-                    return updated;
-                });
-            } catch {
-                // Metrics unavailable.
-            }
-        }
-
-        loadMetrics();
-
-        const interval = setInterval(loadMetrics, 5000);
-
-        return () => clearInterval(interval);
-    }, []);
 
     /*
      * Create Chart.js once.
@@ -104,7 +57,9 @@ function LineGraph() {
                 scales: {
                     x: {
                         ticks: {
-                            maxTicksLimit: 8,
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45,
                         },
 
                         grid: {
@@ -137,17 +92,21 @@ function LineGraph() {
             return;
         }
 
-        const samples = metricsHistory.slice(-sampleCount);
+        const samples = requestHistory
+            .slice(0, sampleCount)
+            .reverse();
 
-        chartInstance.current.data.labels = samples.map((_, index) => {
-            return `${(index + 1) * 5}s`;
-        });
+        chartInstance.current.data.labels = samples.map(
+            (request) => request.time
+        );
 
         chartInstance.current.data.datasets[0].data =
-            samples.map((metrics) => metrics.requests);
+            samples.map(
+                (_, index) => requestHistory.length - samples.length + index + 1
+            );
 
         chartInstance.current.update("none");
-    }, [metricsHistory, sampleCount]);
+    }, [requestHistory, sampleCount]);
 
     return (
         <div className="line-graph">
@@ -167,15 +126,15 @@ function LineGraph() {
                     }
                 >
                     <option value={20}>
-                        Last 20 samples
+                        Last 20 requests
                     </option>
 
                     <option value={50}>
-                        Last 50 samples
+                        Last 50 requests
                     </option>
 
                     <option value={100}>
-                        Last 100 samples
+                        Last 100 requests
                     </option>
                 </select>
             </div>

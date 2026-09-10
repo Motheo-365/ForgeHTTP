@@ -67,10 +67,6 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
         }
 
         loadMetrics();
-
-        const interval = setInterval(loadMetrics, 5000);
-
-        return () => clearInterval(interval);
     }, []);
 
     return (
