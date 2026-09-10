@@ -14,6 +14,7 @@
 #include "Observability/Logger.h"
 #include "Observability/MetricsConnector.h"
 #include "Observability/ServerEventPublisher.h"
+#include "Observability/RequestHistory.h"
 
 #include <utility>
 
@@ -49,6 +50,7 @@ class Server {
         RateLimiterMiddleware rateLimiterMiddleware;
         Logger logger;
         MetricsConnector metricsConnector;
+        RequestHistory requestHistory;
         ServerEventPublisher events;
 
         bool running = false;

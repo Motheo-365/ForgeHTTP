@@ -27,6 +27,7 @@ std::string methodName(HttpMethod method) {
 Server::Server() : pool(8), metricsConnector(8), rateLimiterMiddleware(100) {
     events.subscribe(&logger);
     events.subscribe(&metricsConnector);
+    events.subscribe(&requestHistory);
 
     router.get("/health", [this](const HttpRequest& req) {
         return healthController.getHealth(req);
@@ -34,6 +35,10 @@ Server::Server() : pool(8), metricsConnector(8), rateLimiterMiddleware(100) {
 
     router.get("/api/users", [this](const HttpRequest& req) {
         return userController.getUsers(req);
+    });
+
+    router.get("/api/requests", [this](const HttpRequest& req) {
+        return requestHistory.getRequests();
     });
 
     router.post("/api/users", [this](const HttpRequest& req) {
