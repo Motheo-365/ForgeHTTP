@@ -20,7 +20,7 @@ function Health() {
         setLoading(true);
 
         try {
-            const data = await getHealth();
+            const data = await getHealth(true);
 
             setHealth(data);
             setLastChecked(new Date());

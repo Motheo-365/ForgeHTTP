@@ -36,8 +36,8 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
         async function loadMetrics() {
             try {
                 const [metricsData, requestData] = await Promise.all([
-                    api.getMetrics(),
-                    api.getRequestHistory()
+                    api.getMetrics(true),
+                    api.getRequestHistory(true)
                 ]);
 
                 setMetrics(metricsData);
