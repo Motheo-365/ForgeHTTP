@@ -16,6 +16,10 @@ bool isDashboardRequest(const ServerEvent &event) {
 MetricsConnector::MetricsConnector(int workers) : workers(workers) {}
 
 void MetricsConnector::onEvent(const ServerEvent& event) {
+    if (isDashboardRequest(event)) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex);
 
     if (event.type == ServerEventType::RequestReceived) {
@@ -24,10 +28,6 @@ void MetricsConnector::onEvent(const ServerEvent& event) {
     }
 
     if (event.type != ServerEventType::ResponseSent) {
-        return;
-    }
-
-    if (isDashboardRequest(event)) {
         return;
     }
 
