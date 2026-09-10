@@ -1,6 +1,5 @@
 import type {
     HealthResponse,
-    Metrics,
     User,
     CreateUserRequest
 } from "../types/api";

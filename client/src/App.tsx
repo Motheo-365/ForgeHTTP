@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Layout from "./components/layout";
+
 import Introduction from "./pages/introduction";
 import Dashboard from "./pages/dashboard";
 import Requests from "./pages/requests";
@@ -13,14 +15,17 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Introduction />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/requests" element={<Requests />} />
-                <Route path="/routes" element={<RoutesPage />} />
-                <Route path="/middleware" element={<Middleware />} />
-                <Route path="/metrics" element={<Metrics />} />
-                <Route path="/health" element={<Health />} />
-                <Route path="/configuration" element={<Configuration />} />
+                <Route element={<Layout />}>
+                    <Route path="/" element={<Introduction />} />
+                    <Route path="/introduction" element={<Introduction />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/requests" element={<Requests />} />
+                    <Route path="/routes" element={<RoutesPage />} />
+                    <Route path="/middleware" element={<Middleware />} />
+                    <Route path="/metrics" element={<Metrics />} />
+                    <Route path="/health" element={<Health />} />
+                    <Route path="/configuration" element={<Configuration />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     );
