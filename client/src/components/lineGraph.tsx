@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 
 import { useMetrics } from "../context/metricsContext";
+import {
+    formatRequestTime,
+    getRollingRequestActivity,
+    filterRequestsByRange,
+    REQUEST_RANGE_OPTIONS,
+    type RequestRange
+} from "../services/time";
 
 import "../styles/lineGraph.css";
 
@@ -11,7 +18,7 @@ function LineGraph() {
     const chartInstance = useRef<Chart | null>(null);
     const { requestHistory } = useMetrics();
 
-    const [sampleCount, setSampleCount] = useState(20);
+    const [range, setRange] = useState<RequestRange>("24h");
 
     /*
      * Create Chart.js once.
@@ -28,7 +35,7 @@ function LineGraph() {
                 labels: [],
                 datasets: [
                     {
-                        label: "Requests",
+                        label: "Requests per minute",
                         data: [],
 
                         borderWidth: 2,
@@ -58,7 +65,7 @@ function LineGraph() {
                                 return items[0]?.label ?? "";
                             },
                             label: (item) => {
-                                return `Request ${item.raw}`;
+                                return `${item.raw} requests in the last minute`;
                             },
                         },
                     },
@@ -103,21 +110,21 @@ function LineGraph() {
             return;
         }
 
-        const samples = requestHistory
-            .slice(0, sampleCount)
+        const samples = filterRequestsByRange(requestHistory, range)
             .reverse();
 
-        chartInstance.current.data.labels = samples.map(
-            (request) => request.time
+        const activity = getRollingRequestActivity(
+            samples.map((request) => request.time)
         );
 
-        chartInstance.current.data.datasets[0].data =
-            samples.map(
-                (_, index) => requestHistory.length - samples.length + index + 1
-            );
+        chartInstance.current.data.labels = samples.map(
+            (request) => formatRequestTime(request.time)
+        );
+
+        chartInstance.current.data.datasets[0].data = activity;
 
         chartInstance.current.update("none");
-    }, [requestHistory, sampleCount]);
+    }, [requestHistory, range]);
 
     return (
         <div className="line-graph">
@@ -131,22 +138,16 @@ function LineGraph() {
                 </div>
 
                 <select
-                    value={sampleCount}
+                    value={range}
                     onChange={(event) =>
-                        setSampleCount(Number(event.target.value))
+                        setRange(event.target.value as RequestRange)
                     }
                 >
-                    <option value={20}>
-                        Last 20 requests
-                    </option>
-
-                    <option value={50}>
-                        Last 50 requests
-                    </option>
-
-                    <option value={100}>
-                        Last 100 requests
-                    </option>
+                    {REQUEST_RANGE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </select>
             </div>
 

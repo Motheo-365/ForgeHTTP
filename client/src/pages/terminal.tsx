@@ -6,6 +6,7 @@ import {
     getRequestHistory,
     getConfiguration
 } from "../services/api";
+import { formatRequestTime } from "../services/time";
 import { useMetrics } from "../context/metricsContext";
 
 import "../styles/terminal.css";
@@ -115,7 +116,7 @@ function Terminal() {
                         "---------------",
                         ...data.slice(0, 10).map(
                             (request) =>
-                                `${request.time}  ${request.method.padEnd(6)} ${request.path}  ${request.status}  ${request.duration_ms} ms`
+                                `${formatRequestTime(request.time)}  ${request.method.padEnd(6)} ${request.path}  ${request.status}  ${request.duration_ms} ms`
                         ),
                         ""
                     ]);
