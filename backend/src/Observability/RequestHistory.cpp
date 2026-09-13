@@ -5,6 +5,17 @@
 #include <sstream>
 
 namespace {
+std::tm utcTime(std::time_t timestamp) {
+    std::tm timeInfo{};
+
+#ifdef _WIN32
+    gmtime_s(&timeInfo, &timestamp);
+#else
+    gmtime_r(&timestamp, &timeInfo);
+#endif
+
+    return timeInfo;
+}
 
 }
 
@@ -54,12 +65,16 @@ HttpResponse RequestHistory::getRequests(std::size_t limit) {
         first = false;
 
         const auto timestamp = std::chrono::system_clock::to_time_t(it->timestamp);
-        std::tm timeInfo{};
-        localtime_r(&timestamp, &timeInfo);
+        const auto timeInfo = utcTime(timestamp);
+        const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            it->timestamp.time_since_epoch()
+        ).count() % 1000;
 
         std::ostringstream time;
 
-        time << std::put_time(&timeInfo, "%H:%M:%S");
+        time << std::put_time(&timeInfo, "%Y-%m-%dT%H:%M:%S")
+             << '.' << std::setfill('0') << std::setw(3) << milliseconds
+             << 'Z';
 
         json << "{"
              << "\"time\":\"" << time.str() << "\","
