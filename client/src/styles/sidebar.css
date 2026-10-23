@@ -82,3 +82,30 @@
     background: var(--bg-active);
     border-left-color: var(--accent);
 }
+
+.sidebar-api-token {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-3);
+    border-top: var(--border-width) solid var(--border);
+}
+
+.sidebar-api-token .nav-label {
+    padding: 0;
+}
+
+.sidebar-api-token input {
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
+    color: var(--text);
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+}
+
+.sidebar-api-token small {
+    color: var(--text-muted);
+    font-size: 10px;
+}

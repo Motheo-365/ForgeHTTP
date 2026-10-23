@@ -7,16 +7,30 @@ import type {
     ServerConfiguration
 } from "../types/api";
 
-const DEFAULT_API_URL = "https://forgehttp.onrender.com";
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || "";
+const API_TOKEN_STORAGE_KEY = "forgehttp-api-token";
+let API_TOKEN = window.sessionStorage.getItem(API_TOKEN_STORAGE_KEY) ?? "";
 
-export const API_URL = (
-    import.meta.env.VITE_API_URL || DEFAULT_API_URL
-).replace(/\/$/, "");
+export const API_URL = "https://forgehttp.onrender.com";
+
+export function getApiToken(): string {
+    return API_TOKEN;
+}
+
+export function setApiToken(token: string): void {
+    API_TOKEN = token.trim().replace(/^Bearer\s+/i, "");
+
+    if (API_TOKEN) {
+        window.sessionStorage.setItem(API_TOKEN_STORAGE_KEY, API_TOKEN);
+    } else {
+        window.sessionStorage.removeItem(API_TOKEN_STORAGE_KEY);
+    }
+
+    window.dispatchEvent(new Event("forgehttp-api-token-change"));
+}
 
 function authorizedHeaders(json = false): HeadersInit {
     if (!API_TOKEN) {
-        throw new Error("Set VITE_API_TOKEN in the client environment.");
+        throw new Error("Enter the API bearer token in the sidebar.");
     }
 
     return {
@@ -75,10 +89,7 @@ export async function createUser(user: CreateUserRequest): Promise<User> {
 
 export async function getRequestHistory(internal = false): Promise<RequestHistoryEntry[]> {
     const response = await fetch(`${API_URL}/api/requests`, {
-        headers: {
-            ...authorizedHeaders(),
-            ...(internal ? { "X-ForgeHTTP-Internal": "true" } : {})
-        }
+        headers: internal ? { "X-ForgeHTTP-Internal": "true" } : undefined
     });
 
     if (!response.ok) {
@@ -89,9 +100,7 @@ export async function getRequestHistory(internal = false): Promise<RequestHistor
 }
 
 export async function getConfiguration(): Promise<ServerConfiguration> {
-    const response = await fetch(`${API_URL}/api/config`, {
-        headers: authorizedHeaders()
-    });
+    const response = await fetch(`${API_URL}/api/config`);
 
     if (!response.ok) {
         throw new Error(`Failed to fetch configuration: ${response.status}`);

@@ -157,7 +157,7 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             if (error instanceof TypeError) {
                 setError(
-                    `Cannot reach ForgeHTTP at ${api.API_URL}. Confirm the backend is running and VITE_API_URL is correct.`
+                    `Cannot reach ForgeHTTP at ${api.API_URL}. Confirm the API is available.`
                 );
             } else if (error instanceof Error) {
                 setError(error.message);

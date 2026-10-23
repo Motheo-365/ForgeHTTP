@@ -18,6 +18,9 @@ function Configuration() {
 
     useEffect(() => {
         async function loadConfiguration(): Promise<void> {
+            setLoading(true);
+            setError("");
+
             try {
                 const data = await getConfiguration();
                 setDraft(data);
@@ -32,7 +35,16 @@ function Configuration() {
             }
         }
 
-        loadConfiguration();
+        const handleTokenChange = () => {
+            void loadConfiguration();
+        };
+
+        void loadConfiguration();
+        window.addEventListener("forgehttp-api-token-change", handleTokenChange);
+
+        return () => {
+            window.removeEventListener("forgehttp-api-token-change", handleTokenChange);
+        };
     }, []);
 
     function updateDraft(
