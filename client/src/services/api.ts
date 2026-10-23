@@ -75,7 +75,10 @@ export async function createUser(user: CreateUserRequest): Promise<User> {
 
 export async function getRequestHistory(internal = false): Promise<RequestHistoryEntry[]> {
     const response = await fetch(`${API_URL}/api/requests`, {
-        headers: authorizedHeaders()
+        headers: {
+            ...authorizedHeaders(),
+            ...(internal ? { "X-ForgeHTTP-Internal": "true" } : {})
+        }
     });
 
     if (!response.ok) {

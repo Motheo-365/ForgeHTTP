@@ -154,8 +154,16 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
                 return merged;
             });
             setError(null);
-        } catch {
-            setError("Unable to retrieve server metrics.");
+        } catch (error) {
+            if (error instanceof TypeError) {
+                setError(
+                    `Cannot reach ForgeHTTP at ${api.API_URL}. Confirm the backend is running and VITE_API_URL is correct.`
+                );
+            } else if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError("Unable to retrieve server metrics.");
+            }
         } finally {
             setLoading(false);
         }
