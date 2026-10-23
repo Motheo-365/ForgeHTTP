@@ -134,6 +134,21 @@ void runSuite(int port) {
     require(hasStatus(unauthorized, "401 Unauthorized"),
             "protected routes should reject missing credentials");
 
+    const std::string publicRequestHistory =
+        exchangeHttp(port, request("GET", "/api/requests"));
+    require(hasStatus(publicRequestHistory, "200 OK"),
+            "request history should be publicly readable");
+
+    const std::string publicConfig =
+        exchangeHttp(port, request("GET", "/api/config"));
+    require(hasStatus(publicConfig, "200 OK"),
+            "configuration should be publicly readable");
+
+    const std::string protectedConfigUpdate =
+        exchangeHttp(port, request("PUT", "/api/config", "{\"rateLimit\":150}"));
+    require(hasStatus(protectedConfigUpdate, "401 Unauthorized"),
+            "configuration changes should still require credentials");
+
     const std::string created = exchangeHttp(port, request(
         "POST", "/api/users", "{\"name\":\"Portfolio Tester\"}", true));
     require(hasStatus(created, "201 Created"), "creating a user should return 201");

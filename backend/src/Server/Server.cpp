@@ -25,6 +25,15 @@ std::string configuredApiToken() {
     return token == nullptr ? "" : token;
 }
 
+bool isPublicReadOnlyApiRequest(const HttpRequest& request) {
+    if (request.getMethod() != HttpMethod::GET) {
+        return false;
+    }
+
+    const std::string& path = request.getPath();
+    return path == "/api/requests" || path == "/api/config";
+}
+
     std::string methodName(HttpMethod method) {
         switch (method) {
             case HttpMethod::GET: return "GET";
@@ -288,7 +297,8 @@ void Server::handleConnection(Connection& c) {
         auto process = [&]() {
             rateLimiterMiddleware.handle(request, response, [&]() {
                 if (authenticationEnabled.load() &&
-                    request.getPath().rfind("/api/", 0) == 0) {
+                    request.getPath().rfind("/api/", 0) == 0 &&
+                    !isPublicReadOnlyApiRequest(request)) {
                     authMiddleware.handle(request, response, endpoint);
                 } else {
                     endpoint();

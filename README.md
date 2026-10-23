@@ -87,7 +87,7 @@ Middleware Chain
    ├── Logger
    ├── CORS
    ├── Rate Limiter
-   └── Authentication for /api/*
+   └── Authentication for protected /api/* routes
    │
    ▼
 Router
@@ -188,7 +188,7 @@ cmake --build backend/build
 FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
 
-The server listens on port `8086` by default. Set `PORT` to use another port. `/api/*` requires `FORGEHTTP_API_TOKEN`; if it is unset, protected API calls return `503 Service Unavailable` rather than accepting arbitrary credentials. User records are stored in `forgehttp.db` in the working directory by default. Set `FORGEHTTP_DB_PATH` to choose another SQLite file.
+The server listens on port `8086` by default. Set `PORT` to use another port. Read-only dashboard endpoints (`GET /api/requests` and `GET /api/config`) are public. User operations and configuration changes require `FORGEHTTP_API_TOKEN`; if it is unset, protected API calls return `503 Service Unavailable` rather than accepting arbitrary credentials. User records are stored in `forgehttp.db` in the working directory by default. Set `FORGEHTTP_DB_PATH` to choose another SQLite file.
 
 ```bash
 FORGEHTTP_API_TOKEN=local-demo-token \
@@ -267,7 +267,7 @@ curl -H "Authorization: Bearer local-demo-token" \
   http://localhost:8086/api/requests
 ```
 
-Metrics include request count, active parsed requests, average response time, errors, and worker count. Request history is bounded by configuration.
+Metrics include request count, active parsed requests, average response time, errors, and worker count. Request history is publicly readable and bounded by configuration; do not log sensitive information in URL paths.
 
 `PUT /api/config` can update the rate limit, request-history capacity, CORS, authentication, and request logging at runtime. Port and worker-count changes are rejected with a restart-required message because they affect the listener and existing worker pool.
 
@@ -287,7 +287,7 @@ The image stores SQLite data under `/data`; the named volume keeps user records 
 
 ### Dashboard
 
-With the backend running, configure the demo token and start the React dashboard as described in [client/README.md](./client/README.md). Vite injects `VITE_API_TOKEN` into browser code, so it must only contain a disposable demo credential.
+Start the React dashboard as described in [client/README.md](./client/README.md). Metrics, request history, and configuration are public; user operations and configuration changes require the admin bearer token.
 
 ---
 
@@ -435,7 +435,7 @@ ForgeHTTP is a learning and portfolio project, not a production-hardened replace
 - Shared demo bearer-token authentication, not user accounts or a production identity provider
 - SQLite persistence intended for a small single-process demo, not multi-node scaling
 
-The dashboard in `client/` can connect to live health, metrics, request-history, and configuration APIs using `VITE_API_URL` and `VITE_API_TOKEN`; use only a disposable demo token because Vite bundles it into browser code. The next protocol milestone is chunked transfer coding and keep-alive.
+The dashboard in `client/` connects to the hosted API and accepts its bearer token in the sidebar; the token stays in the current browser tab's session storage. The next protocol milestone is chunked transfer coding and keep-alive.
 
 ---
 

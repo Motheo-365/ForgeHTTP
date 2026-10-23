@@ -34,7 +34,9 @@ cmake --build backend/build
 FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
 
-The default port is `8086`. `/api/*` requires `FORGEHTTP_API_TOKEN`.
+The default port is `8086`. Read-only dashboard endpoints (`GET /api/requests` and
+`GET /api/config`) are public. User operations and configuration changes require
+`FORGEHTTP_API_TOKEN`.
 
 This starts a concurrent HTTP server that:
 
@@ -92,7 +94,7 @@ Each layer only knows about the layer directly below it:
 - **Socket** is a thin RAII wrapper around a file descriptor.
 - **HttpParser** turns raw bytes into an `HttpRequest`; it knows nothing about routing.
 - **Router** maps method + path to a handler; it knows nothing about sockets.
-- **Middleware** runs before routing: CORS, logger, rate limiter, and auth for `/api/*` routes.
+- **Middleware** runs before routing: CORS, logger, rate limiter, and auth for protected `/api/*` routes. Read-only dashboard history/config GET routes are public.
 - **Observability** is cross-cutting, not part of the request pipeline: `Server` owns a `ServerEventPublisher` and publishes lifecycle/request events to it (connection accepted, response sent, server started/stopped); `Logger` and `MetricsConnector` subscribe independently and react without `Server` knowing who's listening.
 
 ---
@@ -172,7 +174,7 @@ Built with `std::thread`, `std::mutex`, `std::condition_variable`, and `std::ato
 Chain of Responsibility: each middleware receives the request, does its work, and decides whether to call the next link.
 
 ```
-Request → CORS → Logger → Rate Limiter → Auth for /api/* → Router
+Request → CORS → Logger → Rate Limiter → Auth for protected /api/* → Router
 ```
 
 ---
@@ -232,7 +234,7 @@ The dashboard includes:
 - Recent request history (method, path, status, latency)
 - API/configuration pages for exercising the server
 
-Set `VITE_API_URL` and `VITE_API_TOKEN` in `client/.env.local` to connect it to a local server. The token is included in browser code, so use only a disposable demo token.
+The dashboard connects to the hosted API and accepts a bearer token in its sidebar for protected endpoints. For local development against a different server, update the API URL in `client/src/services/api.ts`; enter the accepted bearer token in the dashboard sidebar. The token is stored only in the current browser tab's session storage.
 
 ---
 
