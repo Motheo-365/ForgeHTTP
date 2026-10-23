@@ -34,5 +34,7 @@ Supported operators are `+`, `-`, `*`, and `/`. Invalid operands, unsupported
 operators, division by zero, and non-finite results receive a `400` response.
 The calculator endpoint is public and does not change user or configuration data.
 Like other non-internal API calls, calculations appear in server metrics and request
-history. User operations and configuration updates remain protected by
+history. Since calculations are brief, the instantaneous active-connections metric
+may return to zero before a dashboard refresh; use the request total/history to see
+completed calculator traffic. User operations and configuration updates remain protected by
 `FORGEHTTP_API_TOKEN`.

@@ -152,6 +152,11 @@ void runSuite(int port) {
     require(calculation.find("\"result\":36") != std::string::npos,
             "calculator endpoint should return the computed result");
 
+    const std::string calculatorHistory =
+        exchangeHttp(port, request("GET", "/api/requests"));
+    require(calculatorHistory.find("\"path\":\"/api/calculate\"") != std::string::npos,
+            "public calculator requests should appear in request history");
+
     const std::string divisionByZero = exchangeHttp(port, request(
         "POST", "/api/calculate",
         "{\"left\":1,\"operator\":\"/\",\"right\":0}"));

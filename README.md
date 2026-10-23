@@ -267,7 +267,7 @@ curl -H "Authorization: Bearer local-demo-token" \
   http://localhost:8086/api/requests
 ```
 
-Metrics include request count, active parsed requests, average response time, errors, and worker count. Request history is publicly readable and bounded by configuration; do not log sensitive information in URL paths.
+Metrics include total request count, instantaneous active requests, average response time, errors, and worker count. Short API calls from sites are counted in request totals and history, but may finish between metric polls; `active_connections` can correctly read as zero when no request is being processed. Request history is publicly readable and bounded by configuration; do not log sensitive information in URL paths.
 
 ### Calculator API
 
