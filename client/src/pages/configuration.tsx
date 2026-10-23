@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { ServerConfiguration } from "../types/api";
 
 import {
+    getApiToken,
     getConfiguration,
     updateConfiguration
 } from "../services/api";
@@ -15,6 +16,9 @@ function Configuration() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [adminSignedIn, setAdminSignedIn] = useState(
+        () => getApiToken().length > 0
+    );
 
     useEffect(() => {
         async function loadConfiguration(): Promise<void> {
@@ -36,6 +40,7 @@ function Configuration() {
         }
 
         const handleTokenChange = () => {
+            setAdminSignedIn(getApiToken().length > 0);
             void loadConfiguration();
         };
 
@@ -167,10 +172,14 @@ function Configuration() {
 
                 <button
                     className="configuration-save-button"
-                    disabled={!draft || saving || loading}
+                    disabled={!draft || saving || loading || !adminSignedIn}
                     onClick={saveConfiguration}
                 >
-                    {saving ? "SAVING..." : "SAVE CONFIGURATION"}
+                    {saving
+                        ? "SAVING..."
+                        : adminSignedIn
+                            ? "SAVE CONFIGURATION"
+                            : "ADMIN SIGN IN REQUIRED"}
                 </button>
             </header>
 
@@ -208,6 +217,7 @@ function Configuration() {
                                 <input
                                     className="configuration-input"
                                     type="number"
+                                    disabled={!adminSignedIn}
                                     min={1}
                                     max={
                                         item.field === "port"

@@ -287,7 +287,7 @@ The image stores SQLite data under `/data`; the named volume keeps user records 
 
 ### Dashboard
 
-Start the React dashboard as described in [client/README.md](./client/README.md). Metrics, request history, and configuration are public; user operations and configuration changes require the admin bearer token.
+Start the React dashboard as described in [client/README.md](./client/README.md). Metrics, request history, and configuration are public; user operations and configuration changes require the admin bearer token entered through the sidebar sign-in modal. Dashboard history is retained by the browser without age-based trimming.
 
 ---
 

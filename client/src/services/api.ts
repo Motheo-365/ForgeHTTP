@@ -16,8 +16,37 @@ export function getApiToken(): string {
     return API_TOKEN;
 }
 
+export function hasApiToken(): boolean {
+    return API_TOKEN.length > 0;
+}
+
+function normalizedToken(token: string): string {
+    return token.trim().replace(/^Bearer\s+/i, "");
+}
+
+export async function validateAdminToken(token: string): Promise<void> {
+    const normalized = normalizedToken(token);
+    if (!normalized) {
+        throw new Error("Enter the admin token to sign in.");
+    }
+
+    const response = await fetch(`${API_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${normalized}` }
+    });
+
+    if (response.status === 401) {
+        throw new Error("That admin token was rejected. Check the token and try again.");
+    }
+    if (response.status === 503) {
+        throw new Error("Admin authentication is not configured on the server.");
+    }
+    if (!response.ok) {
+        throw new Error(`Admin sign-in failed: ${response.status}`);
+    }
+}
+
 export function setApiToken(token: string): void {
-    API_TOKEN = token.trim().replace(/^Bearer\s+/i, "");
+    API_TOKEN = normalizedToken(token);
 
     if (API_TOKEN) {
         window.sessionStorage.setItem(API_TOKEN_STORAGE_KEY, API_TOKEN);
@@ -126,5 +155,6 @@ export async function updateConfiguration(
         );
     }
 
+    window.dispatchEvent(new Event("forgehttp-config-updated"));
     return data as ServerConfiguration;
 }

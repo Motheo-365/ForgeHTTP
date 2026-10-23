@@ -135,12 +135,7 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
                     entries.set(key, request);
                 }
 
-                const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
                 const merged = Array.from(entries.values())
-                    .filter((request) => {
-                        const timestamp = Date.parse(request.time);
-                        return Number.isNaN(timestamp) || timestamp >= cutoff;
-                    })
                     .sort(
                         (left, right) =>
                             Date.parse(right.time) - Date.parse(left.time)
@@ -170,6 +165,12 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
+        const refreshAfterChange = () => {
+            void refreshMetrics();
+        };
+        window.addEventListener("forgehttp-api-token-change", refreshAfterChange);
+        window.addEventListener("forgehttp-config-updated", refreshAfterChange);
+
         const initialRefresh = window.setTimeout(() => {
             void refreshMetrics();
         }, 0);
@@ -179,6 +180,8 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
         }, 10000);
 
         return () => {
+            window.removeEventListener("forgehttp-api-token-change", refreshAfterChange);
+            window.removeEventListener("forgehttp-config-updated", refreshAfterChange);
             window.clearTimeout(initialRefresh);
             window.clearInterval(interval);
         };
