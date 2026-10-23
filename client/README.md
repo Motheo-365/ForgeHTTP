@@ -1,6 +1,6 @@
 # ForgeHTTP Dashboard
 
-The Vite dashboard reads its API origin and demo bearer token from environment variables.
+The Vite dashboard defaults to the hosted API at `https://forgehttp.onrender.com`. It reads its API origin and bearer token from environment variables.
 
 From the repository root, start the backend with a demo token:
 
@@ -8,7 +8,7 @@ From the repository root, start the backend with a demo token:
 FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
 
-In a second terminal, configure and start the client:
+Configure and start the client:
 
 ```bash
 cd client
@@ -17,6 +17,10 @@ npm install
 npm run dev
 ```
 
-`VITE_API_URL` defaults to `http://localhost:8086`. `VITE_API_TOKEN` must match the backend's `FORGEHTTP_API_TOKEN`.
+For local development, set `VITE_API_URL=http://localhost:8086` and
+`VITE_API_TOKEN=local-demo-token` in `client/.env.local` after copying the example.
+To connect to the hosted API, leave `VITE_API_URL` at its default and configure
+`VITE_API_TOKEN` with a token accepted by that server if you need its protected `/api/*`
+endpoints.
 
-Vite variables are bundled into browser code. Use only a disposable demo token here; this is not a secure way to distribute production credentials.
+`VITE_API_TOKEN` must match the backend's `FORGEHTTP_API_TOKEN`. Vite bundles this token into browser code, so use only a disposable demo token—not a production secret.

@@ -7,7 +7,7 @@ import type {
     ServerConfiguration
 } from "../types/api";
 
-const DEFAULT_API_URL = "http://localhost:8086";
+const DEFAULT_API_URL = "https://forgehttp.onrender.com";
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || "";
 
 export const API_URL = (
