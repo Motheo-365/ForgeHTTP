@@ -19,6 +19,8 @@
 #include "Controllers/ConfigurationController.h"
 
 #include <utility>
+#include <atomic>
+#include <mutex>
 
 // Owns the full request lifecycle: listens, dispatches work, and shuts down cleanly.
 //
@@ -39,7 +41,7 @@ class Server {
         */
         void stop();
 
-        const ServerConfig& getConfig() const;
+        ServerConfig getConfig() const;
         void updateConfig(const ServerConfig& newConfig);
 
     private:
@@ -60,7 +62,11 @@ class Server {
         ServerEventPublisher events;
         ConfigurationController configurationController;
 
-        bool running = false;
+        std::atomic<bool> running{false};
+        std::atomic<bool> acceptLoopActive{false};
+        mutable std::mutex configMutex;
+        std::atomic<bool> corsEnabled{true};
+        std::atomic<bool> authenticationEnabled{true};
         
         /*
             The main loop: blocks on the listening Socket's accept(), wraps each new connection, and enqueues it on the ThreadPool rather than handling it inline — this is what makes the server concurrent.

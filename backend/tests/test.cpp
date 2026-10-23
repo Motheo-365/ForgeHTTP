@@ -1,6 +1,8 @@
 #include "Networking/Socket.h"
+#include "Concurrency/TaskQueue.h"
 
 #include "HTTP/HttpParser.h"
+#include "HTTP/HttpError.h"
 #include "HTTP/HttpResponse.h"
 
 #include "Middleware/Middleware.h"
@@ -15,6 +17,7 @@
 #include "Observability/MetricsConnector.h"
 
 #include <exception>
+#include <functional>
 #include <iostream>
 #include <string>
 
@@ -54,6 +57,7 @@ void testHTTPParser();
 void testHTTPResponse();
 void testMiddleware();
 void testObservability();
+void testTaskQueue();
 
 
 // --------------------------------------------------
@@ -69,6 +73,7 @@ int main() {
     testHTTPResponse();
     testMiddleware();
     testObservability();
+    testTaskQueue();
 
     std::cout
         << "\n=================== TEST SUMMARY =========================\n";
@@ -80,6 +85,33 @@ int main() {
         << "===========================================================\n";
 
     return testsFailed == 0 ? 0 : 1;
+}
+
+void testTaskQueue() {
+    section("Bounded Task Queue");
+    TaskQueue queue(1);
+    const bool accepted = queue.push([] {});
+    const bool rejected = !queue.push([] {});
+    if (accepted && rejected) {
+        pass("Queue enforces its configured capacity");
+    } else {
+        fail("Queue enforces its configured capacity");
+    }
+
+    queue.shutdown();
+    std::function<void()> task = queue.pop();
+    if (task) {
+        task();
+        pass("Queue drains accepted work during shutdown");
+    } else {
+        fail("Queue drains accepted work during shutdown");
+    }
+
+    if (!queue.pop() && !queue.push([] {})) {
+        pass("Queue rejects work after shutdown");
+    } else {
+        fail("Queue rejects work after shutdown");
+    }
 }
 
 // --------------------------------------------------
@@ -223,6 +255,15 @@ void testHTTPParser() {
             );
         }
 
+        const HttpRequest encoded = HttpParser::parse(
+            "GET /search?q=hello+world%21 HTTP/1.1\r\n"
+            "Host: localhost\r\n\r\n");
+        if (encoded.getQueryParam("q") == "hello world!") {
+            pass("Parser decodes query parameters");
+        } else {
+            fail("Parser decodes query parameters");
+        }
+
         // Missing query parameter
         if (request.getQueryParam("missing").empty()) {
             pass("Missing query parameter returns empty value");
@@ -248,6 +289,30 @@ void testHTTPParser() {
             "HTTP request parsing",
             e.what()
         );
+    }
+
+    const auto expectsStatus = [](const std::string& raw, int status) {
+        try {
+            (void)HttpParser::parse(raw);
+        } catch (const HttpError& error) {
+            return error.getStatusCode() == status;
+        }
+        return false;
+    };
+    if (expectsStatus("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: -1\r\n\r\n", 400)) {
+        pass("Parser rejects invalid Content-Length");
+    } else {
+        fail("Parser rejects invalid Content-Length");
+    }
+    if (expectsStatus("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n", 501)) {
+        pass("Parser reports unsupported transfer encoding");
+    } else {
+        fail("Parser reports unsupported transfer encoding");
+    }
+    if (expectsStatus("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", 505)) {
+        pass("Parser rejects unsupported HTTP versions");
+    } else {
+        fail("Parser rejects unsupported HTTP versions");
     }
 }
 
@@ -302,6 +367,14 @@ void testHTTPResponse() {
             fail(
                 "JSON response contains response body"
             );
+        }
+
+        const std::size_t bodyStart = output.find("\r\n\r\n");
+        const std::string wireBody = output.substr(bodyStart + 4);
+        if (wireBody == "{\"message\":\"Hello World\"}") {
+            pass("Serialized body exactly matches Content-Length");
+        } else {
+            fail("Serialized body exactly matches Content-Length");
         }
     }
     catch (const std::exception& e) {
@@ -490,7 +563,7 @@ void testMiddleware() {
 
         HttpResponse response;
 
-        AuthMiddleware auth;
+        AuthMiddleware auth("test-token");
 
         bool nextCalled = false;
 
@@ -544,7 +617,7 @@ void testMiddleware() {
 
         HttpResponse response;
 
-        AuthMiddleware auth;
+        AuthMiddleware auth("test-token");
 
         bool nextCalled = false;
 
@@ -617,7 +690,7 @@ void testObservability() {
 
             bool eventReceived = false;
 
-            void onEvent(const ServerEvent& e) override {
+            void onEvent(const ServerEvent&) override {
                 eventReceived = true;
             }
         };
@@ -629,7 +702,11 @@ void testObservability() {
 
         ServerEvent event{
             ServerEventType::ServerStarted,
-            std::chrono::system_clock::now()
+            std::chrono::system_clock::now(),
+            {},
+            {},
+            0,
+            0.0
         };
 
         publisher.publish(event);
@@ -665,7 +742,7 @@ void testObservability() {
 
             int eventCount = 0;
 
-            void onEvent(const ServerEvent& e) override {
+            void onEvent(const ServerEvent&) override {
                 ++eventCount;
             }
         };
@@ -680,7 +757,11 @@ void testObservability() {
 
         ServerEvent event{
             ServerEventType::ServerStarted,
-            std::chrono::system_clock::now()
+            std::chrono::system_clock::now(),
+            {},
+            {},
+            0,
+            0.0
         };
 
         publisher.publish(event);

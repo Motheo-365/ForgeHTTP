@@ -12,12 +12,15 @@ void MetricsConnector::onEvent(const ServerEvent& event) {
         return;
     }
 
-    if (event.type != ServerEventType::ResponseSent) {
+    if (event.type != ServerEventType::ResponseSent &&
+        event.type != ServerEventType::RequestFailed) {
         return;
     }
 
     requestCount++;
-    activeConnections--;
+    if (activeConnections > 0) {
+        activeConnections--;
+    }
 
     averageResponse =
         ((averageResponse * (requestCount - 1)) + event.durationMs) /

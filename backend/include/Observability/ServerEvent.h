@@ -7,6 +7,7 @@
 enum class ServerEventType {
     RequestReceived,
     ResponseSent,
+    RequestFailed,
     ServerStarted,
     ServerStopped
 };

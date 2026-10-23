@@ -12,7 +12,7 @@ The project focuses on building a practical, modular HTTP server while applying 
 
 ### HTTP Server
 
-- HTTP/1.1 request handling
+- HTTP/1.1 request handling with one request per TCP connection
 - TCP socket-based networking
 - RAII-based socket management
 - Request parsing
@@ -21,7 +21,10 @@ The project focuses on building a practical, modular HTTP server while applying 
 - HTTP status codes
 - Request headers
 - Query parameters
-- Request bodies with `Content-Length`
+- Request bodies with validated `Content-Length`
+- Request/header/body size limits and total read/write deadlines
+- Correct response framing and explicit `400`, `404`, `405`, `408`, `413`, `429`, and `500` errors
+- Graceful shutdown on `SIGINT` and `SIGTERM`
 - `OPTIONS` and CORS preflight handling
 
 ### Routing
@@ -49,6 +52,8 @@ Current middleware includes:
 - Authentication Middleware
 - Rate Limiter Middleware
 
+The server also uses an environment-configured bearer token, a bounded pending-work queue with overload responses, and SQLite-backed user persistence.
+
 Middleware can either:
 
 1. Modify or inspect the request/response and continue the chain.
@@ -61,6 +66,7 @@ For example, authentication middleware can reject an unauthenticated request wit
 ```
 
 without allowing it to reach the router.
+The server pipeline runs logging, optional CORS, rate limiting, optional authentication, and then routing. The auth middleware requires a configured Bearer token; it does not accept any arbitrary non-empty header.
 
 ### Server Architecture
 
@@ -78,8 +84,8 @@ HTTP Parser
    ▼
 Middleware Chain
    │
-   ├── CORS
    ├── Logger
+   ├── CORS
    ├── Rate Limiter
    └── Authentication for /api/*
    │
@@ -109,7 +115,8 @@ This separation allows individual components to be developed and tested independ
 | POSIX Sockets | TCP networking |
 | HTTP/1.1 | Application protocol |
 | nlohmann/json | JSON parsing and serialization |
-| CMake test executable | Backend regression tests |
+| CMake/CTest | Unit and real-socket integration tests |
+| SQLite | Persistent demo API data |
 | Git/GitHub | Version control |
 | React | Web dashboard |
 
@@ -153,6 +160,7 @@ ForgeHTTP/
 - Linux / WSL
 - C++20-compatible compiler
 - CMake 3.20+
+- SQLite development headers/library (`libsqlite3-dev` on Ubuntu)
 - Git
 
 ### Clone the repository
@@ -177,20 +185,25 @@ cmake --build backend/build
 ### Run
 
 ```bash
-./backend/build/forge
+FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
 
-The server listens on port `8085` by default. Set `PORT` to use another port:
+The server listens on port `8086` by default. Set `PORT` to use another port. `/api/*` requires `FORGEHTTP_API_TOKEN`; if it is unset, protected API calls return `503 Service Unavailable` rather than accepting arbitrary credentials. User records are stored in `forgehttp.db` in the working directory by default. Set `FORGEHTTP_DB_PATH` to choose another SQLite file.
 
 ```bash
-PORT=8086 ./backend/build/forge
+FORGEHTTP_API_TOKEN=local-demo-token \
+FORGEHTTP_DB_PATH=./data/forgehttp.db \
+PORT=8087 ./backend/build/forge
 ```
 
-Run the backend tests with:
+Run the backend unit and real-socket integration tests with:
 
 ```bash
 ./backend/build/forge_tests
+./backend/build/forge_integration_tests
 ```
+
+The integration suite starts a temporary server and exercises routes, error statuses, authentication, CRUD, persistence, framing limits, and concurrent clients.
 
 ---
 
@@ -208,65 +221,73 @@ Response:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
+Connection: close
+Content-Length: 15
 
 {"status":"ok"}
 ```
 
 ### Get Users
 
-```http
-GET /api/users HTTP/1.1
-Host: localhost:8086
-Authorization: Bearer test-token
+```bash
+curl -H "Authorization: Bearer local-demo-token" \
+  http://localhost:8086/api/users
 ```
 
-Example response:
+### Create a User
 
-```json
-[
-    {
-        "id": 1,
-        "name": "Alice"
-    },
-    {
-        "id": 2,
-        "name": "Bob"
-    }
-]
+```bash
+curl -i -X POST http://localhost:8086/api/users \
+  -H "Authorization: Bearer local-demo-token" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Motheo"}'
 ```
 
-`/api/users` requires a non-empty `Authorization` header. Requests without one receive `401 Unauthorized`.
+The response is `201 Created` with a generated ID and persisted user. Names must contain 1–100 bytes.
 
-### Create User
+Individual users support `GET /api/users/{id}`, `PUT /api/users/{id}`, and `DELETE /api/users/{id}`:
 
-```http
-POST /api/users HTTP/1.1
-Host: localhost:8086
-Content-Type: application/json
-Authorization: Bearer test-token
+```bash
+curl -i -X PUT http://localhost:8086/api/users/1 \
+  -H "Authorization: Bearer local-demo-token" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated name"}'
+
+curl -i -X DELETE http://localhost:8086/api/users/1 \
+  -H "Authorization: Bearer local-demo-token"
 ```
 
-Example request body:
+Invalid bodies return `400`, missing users return `404`, and successful deletes return `204 No Content`. The authorization header must be exactly `Bearer <FORGEHTTP_API_TOKEN>`. Use only a demo token in public screenshots and never commit real credentials.
 
-```json
-{
-    "name": "Motheo"
-}
-```
-
-Response:
-
-```http
-HTTP/1.1 201 Created
-```
-
-### Metrics
+### Metrics and request history
 
 ```bash
 curl http://localhost:8086/metrics
+curl -H "Authorization: Bearer local-demo-token" \
+  http://localhost:8086/api/requests
 ```
 
-The response includes request count, active connections, average response time, error count, and worker count.
+Metrics include request count, active parsed requests, average response time, errors, and worker count. Request history is bounded by configuration.
+
+`PUT /api/config` can update the rate limit, request-history capacity, CORS, authentication, and request logging at runtime. Port and worker-count changes are rejected with a restart-required message because they affect the listener and existing worker pool.
+
+### Docker demo
+
+From the repository root:
+
+```bash
+docker build -t forgehttp ./backend
+docker run --rm -p 8086:8086 \
+  -e FORGEHTTP_API_TOKEN=local-demo-token \
+  -v forgehttp-data:/data \
+  forgehttp
+```
+
+The image stores SQLite data under `/data`; the named volume keeps user records across container replacements.
+
+### Dashboard
+
+With the backend running, configure the demo token and start the React dashboard as described in [client/README.md](./client/README.md). Vite injects `VITE_API_TOKEN` into browser code, so it must only contain a disposable demo credential.
 
 ---
 
@@ -400,21 +421,21 @@ The project aims to use design patterns where they solve an actual architectural
 
 ---
 
-## Development Goals
+## Supported behavior and limitations
 
-ForgeHTTP is being developed incrementally, with an emphasis on understanding and implementing each layer rather than relying on an existing web-server framework.
+ForgeHTTP is a learning and portfolio project, not a production-hardened replacement for established servers. It intentionally implements a documented subset of HTTP:
 
-Current development areas include:
+- HTTP/1.1 origin-form requests with a `Host` header and `Content-Length` framing
+- `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, and `OPTIONS` method parsing
+- One request per TCP connection; responses explicitly use `Connection: close`
+- Request line limited to 8 KiB, headers to 32 KiB, and request body to 1 MiB
+- Five-second total request-read and response-write deadlines
+- No chunked request bodies, persistent keep-alive, TLS, virtual hosts, or static-file serving
+- A bounded worker queue (128 waiting connections); overload receives `503`
+- Shared demo bearer-token authentication, not user accounts or a production identity provider
+- SQLite persistence intended for a small single-process demo, not multi-node scaling
 
-- HTTP request/response handling
-- Middleware pipeline
-- Routing
-- Server architecture
-- Concurrent request handling
-- React-based administration dashboard
-- Static file serving
-- Stronger authentication and configurable rate-limit windows
-- More complete HTTP/1.1 behavior, including keep-alive and chunked bodies
+The dashboard in `client/` can connect to live health, metrics, request-history, and configuration APIs using `VITE_API_URL` and `VITE_API_TOKEN`; use only a disposable demo token because Vite bundles it into browser code. The next protocol milestone is chunked transfer coding and keep-alive.
 
 ---
 
@@ -442,7 +463,7 @@ The result is a project that demonstrates both **low-level C++ development** and
 
 🚧 **Active Development**
 
-The backend builds and runs with concurrent request handling, routing, middleware, JSON API endpoints, lifecycle events, and metrics. The React dashboard and broader HTTP functionality are still under development.
+The backend includes bounded concurrent handling, request framing/size limits, routing, middleware, SQLite CRUD, lifecycle events, metrics, and unit/integration test targets. The React dashboard is configurable for a local demo. TLS, keep-alive, chunked request bodies, and static-file serving remain future milestones.
 
 ---
 

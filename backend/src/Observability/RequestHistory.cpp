@@ -3,13 +3,15 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
 RequestHistory::RequestHistory(std::size_t maxEntries)
     : maxEntries(maxEntries) {}
 
 void RequestHistory::onEvent(const ServerEvent &event) {
 
-    if (event.type != ServerEventType::ResponseSent) {
+    if (event.type != ServerEventType::ResponseSent &&
+        event.type != ServerEventType::RequestFailed) {
         return;
     }
 
@@ -30,20 +32,10 @@ HttpResponse RequestHistory::getRequests(std::size_t limit) {
         limit = requests.size();
     }
 
-    std::ostringstream json;
-
-    json << "[";
+    nlohmann::json result = nlohmann::json::array();
     auto start = requests.end() - static_cast<std::ptrdiff_t>(limit);
-    bool first = true;
-
     for (auto it = requests.end(); it != start;) {
         --it;
-
-        if (!first) {
-            json << ",";
-        }
-
-        first = false;
 
         const auto timestamp = std::chrono::system_clock::to_time_t(it->timestamp);
         std::tm timeInfo{};
@@ -53,17 +45,16 @@ HttpResponse RequestHistory::getRequests(std::size_t limit) {
 
         time << std::put_time(&timeInfo, "%H:%M:%S");
 
-        json << "{"
-             << "\"time\":\"" << time.str() << "\","
-             << "\"method\":\"" << it->method << "\","
-             << "\"path\":\"" << it->path << "\","
-             << "\"status\": " << it->statusCode << ","
-             << "\"duration_ms\": " << it->durationMs
-             << "}";
+        result.push_back({
+            {"time", time.str()},
+            {"method", it->method},
+            {"path", it->path},
+            {"status", it->statusCode},
+            {"duration_ms", it->durationMs}
+        });
     }
 
-    json << "]";
-    return HttpResponse::json(json.str());
+    return HttpResponse::json(result.dump());
 }
 
 void RequestHistory::setMaxEntries(std::size_t newMaxEntries) {

@@ -3,14 +3,16 @@
 
 #include "Middleware.h"
 
+#include <cstddef>
 #include <chrono>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
 class RateLimiterMiddleware : public Middleware {
 
 public:
-    RateLimiterMiddleware(int limit);
+    explicit RateLimiterMiddleware(std::size_t limit);
 
     /**
      * Tracks request count per client within a 60-second window.
@@ -23,13 +25,13 @@ public:
 
 private:
     struct ClientRateLimit {
-        int count = 0;
+        std::size_t count = 0;
         std::chrono::steady_clock::time_point windowStart;
     };
 
     std::unordered_map<std::string, ClientRateLimit> requestCounts;
-
-    int limit;
+    std::mutex mutex;
+    std::size_t limit;
     std::chrono::seconds window{60};
 };
 

@@ -23,6 +23,7 @@ class Connection {
             Delegates the underlying Socket's receive()
         */
         std::string read();
+        std::string peerAddress() const;
 
         /*
             Delegates to the underlying Socket's send()

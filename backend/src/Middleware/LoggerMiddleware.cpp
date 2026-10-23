@@ -23,14 +23,22 @@ std::string methodName(HttpMethod method) {
 void LoggerMiddleware::handle(HttpRequest& req, HttpResponse& res, std::function<void()> next) {
     const auto start = std::chrono::steady_clock::now();
     next();
+    if (!enabled.load()) {
+        return;
+    }
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start).count();
     const std::time_t now = std::time(nullptr);
-    const std::tm local_time = *std::localtime(&now);
+    std::tm local_time{};
+    localtime_r(&now, &local_time);
 
     std::cout << '[' << std::put_time(&local_time, "%H:%M:%S") << "] "
               << methodName(req.getMethod()) << ' '
               << std::string(req.getPath()) << ' '
               << res.getStatusCode() << ' ' << elapsed << "ms\n";
+}
+
+void LoggerMiddleware::setEnabled(bool value) {
+    enabled.store(value);
 }

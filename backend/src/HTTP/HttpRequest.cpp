@@ -65,3 +65,8 @@ std::string HttpRequest::getBody() const {
 std::string HttpRequest::getClientAddress() const {
     return clientAddress;
 }
+
+std::string HttpRequest::getPathParam(const std::string& key) const {
+    const auto it = params.find(key);
+    return it == params.end() ? "" : it->second;
+}

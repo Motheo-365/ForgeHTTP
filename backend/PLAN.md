@@ -31,8 +31,10 @@ The current backend can be started with:
 ```bash
 cmake -S backend -B backend/build
 cmake --build backend/build
-PORT=8085 ./backend/build/forge
+FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
+
+The default port is `8086`. `/api/*` requires `FORGEHTTP_API_TOKEN`.
 
 This starts a concurrent HTTP server that:
 
@@ -41,6 +43,9 @@ This starts a concurrent HTTP server that:
 - Serves a small JSON API
 - Exposes a `/metrics` endpoint
 - Can be consumed by the React dashboard in `client/`
+- Limits request/header sizes and socket deadlines, and closes after one request per connection
+- Stores user records in SQLite and supports authenticated CRUD
+- Bounds the work queue and returns `503` when overloaded
 
 ### Definition of done
 
@@ -59,11 +64,11 @@ The project is successful if I can explain, unaided, in an interview:
 |---|---|---|
 | Language | C++20 | Modern features without hiding fundamentals |
 | Build system | CMake | Industry standard, plays well with Docker |
-| Testing | CMake test executable | Focused backend regression tests in `backend/tests/test.cpp` |
+| Testing | CMake/CTest | Unit tests plus real-socket server integration tests |
 | Networking | POSIX sockets (`socket`, `bind`, `listen`, `accept`, `recv`, `send`) | Forces understanding of what HTTP sits on top of |
 | JSON | nlohmann/json | Request validation and response serialization |
 | Frontend | React (+ a chart lib, e.g. Recharts) | Reuses existing React experience; talks to the C++ server's own API |
-| Deployment | Docker + docker-compose | Designed in from day one, not bolted on |
+| Deployment | Docker | Reproducible Linux build; Docker Compose remains a follow-up |
 
 Dependencies are kept deliberately minimal. The interesting parts — sockets, HTTP parsing, concurrency, routing — are built by hand, not imported.
 
@@ -151,7 +156,7 @@ router.get("/users", getUsers);
 router.post("/users", createUser);
 ```
 
-Later extended to support path parameters (`/users/:id` → `params["id"] = "42"`).
+Supports path parameters (`/users/:id` → `params["id"] = "42"`).
 
 ### `ThreadPool`
 
@@ -217,16 +222,17 @@ This is what elevates the pitch from "I made a server" to "I built a concurrent 
 
 ## 8. Frontend: Admin Dashboard
 
-A React dashboard that consumes the C++ server's own API (`/metrics`, request log data) — no separate backend for the dashboard itself.
+The React dashboard in `client/` consumes the C++ server's health, metrics, request-history, user, and configuration APIs; it does not need a separate backend.
 
-**Planned layout:**
+The dashboard includes:
 
 - Header: server name/status
 - Stat cards: total requests, active connections, average response time
-- Requests/second chart (polling `/metrics` on an interval, or later via WebSocket push)
-- Recent requests table (method, path, status, latency)
+- Live metrics charts, refreshed by polling
+- Recent request history (method, path, status, latency)
+- API/configuration pages for exercising the server
 
-**Stack:** React + a charting library (Recharts or Chart.js), plain `fetch`/polling to start, no heavy framework needed. This is intentionally built *last*, once the backend actually emits real metrics to visualize — building it earlier means mocking data that later has to be rewired.
+Set `VITE_API_URL` and `VITE_API_TOKEN` in `client/.env.local` to connect it to a local server. The token is included in browser code, so use only a disposable demo token.
 
 ---
 
@@ -234,13 +240,13 @@ A React dashboard that consumes the C++ server's own API (`/metrics`, request lo
 
 Designed in from day one, not retrofitted:
 
-- `Dockerfile` — builds via CMake inside an Ubuntu/Linux base image, produces the `forge` binary
-- `docker-compose.yml` — runs the server (and later, the dashboard as a second service)
-- Port is never hardcoded:
+- `Dockerfile` — builds via CMake inside Ubuntu, runs CTest, and produces the `forge` binary
+- Docker Compose orchestration — planned, not currently included
+- Port is configurable (default `8086`):
 
 ```cpp
 const char* port = std::getenv("PORT");
-// fall back to 8085 if unset
+// fall back to 8086 if unset
 ```
 
 ---
@@ -249,16 +255,16 @@ const char* port = std::getenv("PORT");
 
 | # | Milestone | Outcome |
 |---|---|---|
-| 1 | TCP server | Complete: RAII socket accepts, reads, writes, and closes connections |
-| 2 | HTTP parsing | Complete: methods, headers, query strings, bodies, and `Content-Length` |
-| 3 | Router | Complete: method matching and `:param` route matching |
-| 4 | Thread pool | Complete: fixed workers, task queue, shutdown, and joining |
-| 5 | Middleware | Complete: CORS, logger, auth, and rate limiting are wired into `Server` |
+| 1 | TCP server | Implemented: RAII sockets, deadlines, bounded queue, overload response, and graceful shutdown |
+| 2 | HTTP parsing | Implemented subset: HTTP/1.1 headers, decoded query strings, strict `Content-Length`, and limits; no chunked bodies |
+| 3 | Router | Implemented: method matching, path parameters, 404, and 405/Allow responses |
+| 4 | Thread pool | Implemented: fixed workers, bounded thread-safe queue, drain-and-join shutdown |
+| 5 | Middleware | Implemented: configurable CORS/logging/auth and thread-safe per-client rate limiting |
 | 6 | Static files | Planned: serve HTML/CSS/JS from a configurable directory |
-| 7 | JSON API | Complete: `/health` and authenticated `/api/users` endpoints |
-| 8 | Metrics | Complete: `/metrics`, lifecycle events, request counts, timings, errors, and workers |
-| 9 | React dashboard | In progress: `client/` dashboard consumes backend data |
-| 10 | Docker + deployment | In progress: Docker assets exist; deployment workflow remains to be verified |
+| 7 | JSON API | Implemented: health endpoint and authenticated SQLite-backed user CRUD |
+| 8 | Metrics | Implemented: `/metrics`, lifecycle/request events, request history, timings, errors, and workers |
+| 9 | React dashboard | Implemented: `client/` connects to live health, metrics, request history, and configuration APIs |
+| 10 | Docker + deployment | Implemented: SQLite-aware Docker image and GitHub Actions CI added; CMake build and CTest pass in Ubuntu WSL; Docker/hosted CI execution remains |
 
 **Rule for the whole project:** build bottom-up. Don't skip ahead to framework niceties before the TCP/HTTP fundamentals are solid — the fundamentals are the actual point of the project.
 
@@ -266,8 +272,7 @@ const char* port = std::getenv("PORT");
 
 ## 11. Immediate Next Steps
 
-1. Add focused tests for route parameters, CORS preflight, rate limiting, and server shutdown.
-2. Add static-file serving without bypassing the existing HTTP response layer.
-3. Make authentication and rate-limit policy configurable instead of using development defaults.
-4. Connect the `client/` dashboard to `/metrics` and document its development command.
-5. Verify the Docker build and add a repeatable deployment workflow.
+1. Run the Docker build and GitHub Actions workflow; the backend CMake build and CTest suites already pass in Ubuntu WSL.
+2. Expand HTTP interoperability with keep-alive and chunked transfer coding, preserving strict parser tests.
+3. Add keep-alive and chunked transfer coding with integration coverage.
+4. Consider static-file serving only after HTTP behavior is well covered by integration tests.

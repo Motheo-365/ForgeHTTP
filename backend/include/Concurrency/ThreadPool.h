@@ -20,7 +20,7 @@ class ThreadPool {
         /*
             Pushes a unit of work (typically "handle this one connection") onto the shared TaskQueue for the next available worker to pick up.
         */
-        void enqueue(std::function<void()> task);
+        bool enqueue(std::function<void()> task);
         
         /*
             Sets the stopping flag, wakes every worker via the condition variable, and joins all worker threads so the process can exit cleanly with no leaked threads.

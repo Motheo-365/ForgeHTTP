@@ -1,12 +1,18 @@
 #include "Concurrency/TaskQueue.h"
 
-#include <iostream>
-#include <queue>
+#include <utility>
 
-void TaskQueue::push(std::function<void()> task) {
+TaskQueue::TaskQueue(std::size_t capacity)
+    : capacity(capacity) {}
+
+bool TaskQueue::push(std::function<void()> task) {
     std::unique_lock<std::mutex> lock(mtx);
-    tasks.push_back(task);
+    if (stopping || tasks.size() >= capacity) {
+        return false;
+    }
+    tasks.push_back(std::move(task));
     cv.notify_one();
+    return true;
 }
 
 std::function<void()> TaskQueue::pop()  {

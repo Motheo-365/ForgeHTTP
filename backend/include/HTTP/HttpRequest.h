@@ -24,9 +24,12 @@ class HttpRequest {
         std::string getVersion() const;
         std::string getBody() const;
         std::string getClientAddress() const;
+        std::string getPathParam(const std::string& key) const;
 
 private:
         friend class HttpParser;
+        friend class Router;
+        friend class Server;
         
         /*
             Populated by HttpParser from the request line, e.g. GET /users?id=10 HTTP/1.1 becomes method=GET, path=/users, version=HTTP/1.1

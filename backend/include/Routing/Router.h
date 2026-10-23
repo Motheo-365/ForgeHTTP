@@ -25,6 +25,7 @@ class Router{
             Registers a PUT route for the given path pattern
         */
         void put(const std::string& path, Handler handler);
+        void patch(const std::string& path, Handler handler);
 
         /*
             Registers a DELETE route for the given path pattern/
@@ -35,7 +36,9 @@ class Router{
         /*
             Scans the registered routes for one whose method and pattern match teh request, returning a pointer to it (or nullptr if none match, which should produce a 404 response upstream)
         */
-        Route* match(const HttpRequest& request);
+        Route* match(HttpRequest& request);
+        bool hasPath(const std::string& path) const;
+        std::string allowedMethods(const std::string& path) const;
 
     private:
         std::vector<Route> routes;

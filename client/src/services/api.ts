@@ -7,14 +7,25 @@ import type {
     ServerConfiguration
 } from "../types/api";
 
-const DEFAULT_API_URL = "https://forgehttp.onrender.com"
+const DEFAULT_API_URL = "http://localhost:8086";
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || "";
 
 export const API_URL = (
     import.meta.env.VITE_API_URL || DEFAULT_API_URL
 ).replace(/\/$/, "");
 
-// CRUD: GET, POST, PUT, DELETE
-export async function getHealth (): Promise<HealthResponse> {
+function authorizedHeaders(json = false): HeadersInit {
+    if (!API_TOKEN) {
+        throw new Error("Set VITE_API_TOKEN in the client environment.");
+    }
+
+    return {
+        ...(json ? { "Content-Type": "application/json" } : {}),
+        Authorization: `Bearer ${API_TOKEN}`
+    };
+}
+
+export async function getHealth(): Promise<HealthResponse> {
     const response = await fetch(`${API_URL}/health`);
 
     if (!response.ok) {
@@ -28,19 +39,15 @@ export async function getMetrics(): Promise<Metrics> {
     const response = await fetch(`${API_URL}/metrics`);
 
     if (!response.ok) {
-        throw new Error(
-            `Failed to fetch metrics: ${response.status}`
-        );
+        throw new Error(`Failed to fetch metrics: ${response.status}`);
     }
 
     return response.json();
 }
 
-export async function getUsers (): Promise<User[]> {
+export async function getUsers(): Promise<User[]> {
     const response = await fetch(`${API_URL}/api/users`, {
-        headers: {
-            Authorization: "Bearer dashboard"
-        }
+        headers: authorizedHeaders()
     });
 
     if (!response.ok) {
@@ -50,13 +57,10 @@ export async function getUsers (): Promise<User[]> {
     return response.json();
 }
 
-export async function createUser (user: CreateUserRequest): Promise<User> {
+export async function createUser(user: CreateUserRequest): Promise<User> {
     const response = await fetch(`${API_URL}/api/users`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer dashboard"
-        },
+        headers: authorizedHeaders(true),
         body: JSON.stringify(user)
     });
 
@@ -69,15 +73,11 @@ export async function createUser (user: CreateUserRequest): Promise<User> {
 
 export async function getRequestHistory(): Promise<RequestHistoryEntry[]> {
     const response = await fetch(`${API_URL}/api/requests`, {
-        headers: {
-            Authorization: "Bearer dashboard"
-        }
+        headers: authorizedHeaders()
     });
 
     if (!response.ok) {
-        throw new Error(
-            `Failed to fetch request history: ${response.status}`
-        );
+        throw new Error(`Failed to fetch request history: ${response.status}`);
     }
 
     return response.json();
@@ -85,9 +85,7 @@ export async function getRequestHistory(): Promise<RequestHistoryEntry[]> {
 
 export async function getConfiguration(): Promise<ServerConfiguration> {
     const response = await fetch(`${API_URL}/api/config`, {
-        headers: {
-            Authorization: "Bearer dashboard"
-        }
+        headers: authorizedHeaders()
     });
 
     if (!response.ok) {
@@ -102,10 +100,7 @@ export async function updateConfiguration(
 ): Promise<ServerConfiguration> {
     const response = await fetch(`${API_URL}/api/config`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer dashboard"
-        },
+        headers: authorizedHeaders(true),
         body: JSON.stringify(configuration)
     });
 

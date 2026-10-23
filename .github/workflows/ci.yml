@@ -1,0 +1,19 @@
+name: ForgeHTTP CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SQLite development files
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+      - name: Configure
+        run: cmake -S backend -B backend/build -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build backend/build --parallel 2
+      - name: Test
+        run: ctest --test-dir backend/build --output-on-failure

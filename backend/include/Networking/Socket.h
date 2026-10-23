@@ -47,6 +47,8 @@ class Socket {
             The listening socket itself keeps listening.
         */
         Socket accept();
+        bool waitForConnection(int timeoutMilliseconds);
+        void shutdown();
 
         // Closes the descriptor and makes this socket empty.
         void close();
@@ -56,6 +58,7 @@ class Socket {
             Loops on recv() to handle writes, since a single call is not guaranteed to send the whole buffer.
         */
         std::string receive();
+        std::string peerAddress() const;
 
         /*
             Writes the given bytes to the socket.

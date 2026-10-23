@@ -1,5 +1,13 @@
 # CMake build directory
 build/
+backend/build/
+
+# Local SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
 
 # CMake generated files
 CMakeCache.txt
@@ -25,6 +33,11 @@ install_manifest.txt
 
 # Node.js dependencies
 node_modules/
+
+# Local environment values; commit only example templates
+.env
+.env.*
+!.env.example
 
 # IDE/editor files
 .vscode/

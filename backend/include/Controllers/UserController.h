@@ -4,30 +4,28 @@
 #include "HTTP/HttpResponse.h"
 #include "HTTP/HttpRequest.h"
 
+#include <mutex>
 #include <string>
-#include <vector>
 
-// In memory User structure
-struct User {
-    int id;
-    std::string name;
-};
+struct sqlite3;
 
-// Backs the example JSON API described in PLAN.md
 class UserController {
-    public:
-        UserController();
+public:
+    explicit UserController(const std::string& databasePath = {});
+    ~UserController();
 
-        // Returns a 200 JSON array of users. registered against GET /api/users
-        HttpResponse getUsers(const HttpRequest& req);
+    UserController(const UserController&) = delete;
+    UserController& operator=(const UserController&) = delete;
 
-        // Parses the request body, validates it, adds a new user, and returns a 201 response with the created record (or 400 resposne if teh body is invalid). 
-        // Registered against POST /api/users
-        HttpResponse createUser(const HttpRequest& req);
+    HttpResponse getUsers(const HttpRequest& req);
+    HttpResponse getUser(const HttpRequest& req);
+    HttpResponse createUser(const HttpRequest& req);
+    HttpResponse updateUser(const HttpRequest& req);
+    HttpResponse deleteUser(const HttpRequest& req);
 
-    private:
-        std::vector<User> users;
-        int nextId = 1;
+private:
+    sqlite3* database = nullptr;
+    std::mutex mutex;
 };
 
 #endif

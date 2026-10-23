@@ -40,7 +40,7 @@ class HttpResponse {
        */
        std::string toString() const;
 
-       int getStatusCode();
+       int getStatusCode() const;
 
     private:
         int statusCode = 200;

@@ -6,6 +6,8 @@ project(ForgeHTTP
     LANGUAGES CXX
 )
 
+include(CTest)
+
 # Use C++20
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,6 +21,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # --------------------------------------------------
 
 include(FetchContent)
+find_package(SQLite3 REQUIRED)
 
 FetchContent_Declare(
     json
@@ -43,13 +46,11 @@ list(REMOVE_ITEM SOURCES
 add_executable(forge
     ${SOURCES}
     "${PROJECT_SOURCE_DIR}/src/main.cpp"
-    include/Server/ServerConfig.h
-    include/Controllers/ConfigurationController.h
-    src/Controllers/ConfigurationController.cpp
 )
 
 target_link_libraries(forge PRIVATE
     nlohmann_json::nlohmann_json
+    SQLite::SQLite3
 )
 
 target_include_directories(forge PRIVATE
@@ -61,8 +62,35 @@ add_executable(forge_tests
     "${PROJECT_SOURCE_DIR}/tests/test.cpp"
 )
 
+add_executable(forge_integration_tests
+    ${SOURCES}
+    "${PROJECT_SOURCE_DIR}/tests/integration.cpp"
+)
+target_link_libraries(forge_integration_tests PRIVATE
+    nlohmann_json::nlohmann_json
+    SQLite::SQLite3
+)
+target_include_directories(forge_integration_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
+if (MSVC)
+    target_compile_options(forge_integration_tests PRIVATE /W4)
+else()
+    target_compile_options(forge_integration_tests PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()
+
+if (BUILD_TESTING)
+    add_test(NAME forge_unit_tests COMMAND forge_tests)
+    add_test(NAME forge_integration_tests COMMAND forge_integration_tests)
+endif()
+
 target_link_libraries(forge_tests PRIVATE
     nlohmann_json::nlohmann_json
+    SQLite::SQLite3
 )
 
 target_include_directories(forge_tests PRIVATE

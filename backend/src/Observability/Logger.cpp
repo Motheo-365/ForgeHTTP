@@ -22,5 +22,11 @@ void Logger::onEvent(const ServerEvent& e) {
                       << e.statusCode << " "
                       << e.durationMs << "ms\n";
             break;
+
+        case ServerEventType::RequestFailed:
+            std::cout << "Request failed: "
+                      << e.statusCode << " "
+                      << e.durationMs << "ms\n";
+            break;
     }
 }
