@@ -35,8 +35,8 @@ FORGEHTTP_API_TOKEN=local-demo-token PORT=8086 ./backend/build/forge
 ```
 
 The default port is `8086`. Read-only dashboard endpoints (`GET /api/requests` and
-`GET /api/config`) are public. User operations and configuration changes require
-`FORGEHTTP_API_TOKEN`.
+`GET /api/config`) and the stateless calculator demo endpoint (`POST /api/calculate`)
+are public. User operations and configuration changes require `FORGEHTTP_API_TOKEN`.
 
 This starts a concurrent HTTP server that:
 

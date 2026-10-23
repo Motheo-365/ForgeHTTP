@@ -144,6 +144,31 @@ void runSuite(int port) {
     require(hasStatus(publicConfig, "200 OK"),
             "configuration should be publicly readable");
 
+    const std::string calculation = exchangeHttp(port, request(
+        "POST", "/api/calculate",
+        "{\"left\":12,\"operator\":\"*\",\"right\":3}"));
+    require(hasStatus(calculation, "200 OK"),
+            "calculator endpoint should be public");
+    require(calculation.find("\"result\":36") != std::string::npos,
+            "calculator endpoint should return the computed result");
+
+    const std::string divisionByZero = exchangeHttp(port, request(
+        "POST", "/api/calculate",
+        "{\"left\":1,\"operator\":\"/\",\"right\":0}"));
+    require(hasStatus(divisionByZero, "400 Bad Request"),
+            "calculator should reject division by zero");
+
+    const std::string unsupportedOperator = exchangeHttp(port, request(
+        "POST", "/api/calculate",
+        "{\"left\":1,\"operator\":\"^\",\"right\":2}"));
+    require(hasStatus(unsupportedOperator, "400 Bad Request"),
+            "calculator should reject unsupported operators");
+
+    const std::string invalidCalculation = exchangeHttp(port, request(
+        "POST", "/api/calculate", "{\"left\":\"one\",\"operator\":\"+\",\"right\":2}"));
+    require(hasStatus(invalidCalculation, "400 Bad Request"),
+            "calculator should reject non-numeric operands");
+
     const std::string protectedConfigUpdate =
         exchangeHttp(port, request("PUT", "/api/config", "{\"rateLimit\":150}"));
     require(hasStatus(protectedConfigUpdate, "401 Unauthorized"),

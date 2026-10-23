@@ -269,6 +269,23 @@ curl -H "Authorization: Bearer local-demo-token" \
 
 Metrics include request count, active parsed requests, average response time, errors, and worker count. Request history is publicly readable and bounded by configuration; do not log sensitive information in URL paths.
 
+### Calculator API
+
+The standalone calculator in [`sites/`](./sites/) demonstrates a separate site using
+ForgeHTTP as its backend. It sends arithmetic operations to a public, stateless API
+endpoint:
+
+```bash
+curl -X POST http://localhost:8086/api/calculate \
+  -H "Content-Type: application/json" \
+  -d '{"left":24,"operator":"+","right":6}'
+```
+
+The JSON response contains the operands and result. Supported operators are `+`, `-`,
+`*`, and `/`; invalid input and division by zero return `400`. It does not change user
+or configuration data, though calculator calls are included in request metrics/history.
+User operations and configuration changes remain protected.
+
 `PUT /api/config` can update the rate limit, request-history capacity, CORS, authentication, and request logging at runtime. Port and worker-count changes are rejected with a restart-required message because they affect the listener and existing worker pool.
 
 ### Docker demo
@@ -287,7 +304,7 @@ The image stores SQLite data under `/data`; the named volume keeps user records 
 
 ### Dashboard
 
-Start the React dashboard as described in [client/README.md](./client/README.md). Metrics, request history, and configuration are public; user operations and configuration changes require the admin bearer token entered through the sidebar sign-in modal. Dashboard history is retained by the browser without age-based trimming.
+Start the React dashboard as described in [client/README.md](./client/README.md). Metrics, request history, and configuration are public; user operations and configuration changes require the admin bearer token entered through the sidebar sign-in modal. Dashboard history is retained by the browser without age-based trimming. The standalone calculator demo is in [`sites/`](./sites/README.md).
 
 ---
 

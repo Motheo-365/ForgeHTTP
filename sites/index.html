@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="A simple calculator that sends arithmetic operations to the ForgeHTTP C++ API."
+        />
+        <meta name="theme-color" content="#101412" />
+        <title>Greenline — A calculator powered by ForgeHTTP</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="./styles.css" />
+        <script src="./app.js" defer></script>
+    </head>
+    <body>
+        <div class="site-shell">
+            <header class="topbar">
+                <a class="brand" href="./" aria-label="Greenline calculator home">
+                    <span class="brand-icon" aria-hidden="true">+</span>
+                    <span>greenline<span class="brand-period">.</span></span>
+                </a>
+                <div class="powered-by">
+                    <span class="server-light" id="server-light"></span>
+                    <span id="server-status" role="status">CONNECTING TO FORGEHTTP</span>
+                </div>
+            </header>
+
+            <main>
+                <section class="intro">
+                    <span class="eyebrow">A SIMPLE TOOL / POWERED BY A C++ API</span>
+                    <h1>Numbers in.<br /><span>Answers from Forge.</span></h1>
+                    <p>
+                        Greenline is a small calculator. You enter the numbers here;
+                        ForgeHTTP receives the operation, calculates the result, and
+                        sends it back as JSON.
+                    </p>
+                </section>
+
+                <section class="workspace" aria-label="Calculator and API activity">
+                    <div class="calculator-card">
+                        <div class="card-topline">
+                            <div>
+                                <span class="eyebrow">CALCULATOR / 01</span>
+                                <h2>Quick calculation</h2>
+                            </div>
+                            <span class="calculator-symbol" aria-hidden="true">ƒx</span>
+                        </div>
+
+                        <form id="calculator-form">
+                            <label for="left-value">FIRST NUMBER</label>
+                            <input
+                                id="left-value"
+                                name="left"
+                                type="number"
+                                step="any"
+                                placeholder="e.g. 24"
+                                required
+                            />
+
+                            <div class="operation-row">
+                                <label for="operator">OPERATION</label>
+                                <select id="operator" name="operator" aria-label="Arithmetic operation">
+                                    <option value="+">Add (+)</option>
+                                    <option value="-">Subtract (−)</option>
+                                    <option value="*">Multiply (×)</option>
+                                    <option value="/">Divide (÷)</option>
+                                </select>
+                            </div>
+
+                            <label for="right-value">SECOND NUMBER</label>
+                            <input
+                                id="right-value"
+                                name="right"
+                                type="number"
+                                step="any"
+                                placeholder="e.g. 6"
+                                required
+                            />
+
+                            <button class="calculate-button" id="calculate-button" type="submit">
+                                <span id="calculate-label">CALCULATE WITH FORGEHTTP</span>
+                                <span aria-hidden="true">↗</span>
+                            </button>
+                        </form>
+
+                        <div class="result-card" id="result-card" aria-live="polite">
+                            <span class="eyebrow">SERVER RESPONSE</span>
+                            <strong id="result-value">Your answer will appear here</strong>
+                            <span id="result-detail">Waiting for a calculation</span>
+                        </div>
+                        <p class="form-error" id="form-error" role="alert" hidden></p>
+                    </div>
+
+                    <aside class="api-card">
+                        <div class="api-card-heading">
+                            <span class="eyebrow">UNDER THE SURFACE</span>
+                            <span class="live-pill"><span></span> LIVE API</span>
+                        </div>
+                        <h2>The browser asks.<br />ForgeHTTP answers.</h2>
+                        <p class="api-description">
+                            Every calculation is sent to the running C++ server.
+                            The browser doesn’t calculate the answer itself.
+                        </p>
+
+                        <div class="request-preview">
+                            <div class="preview-heading">
+                                <span>REQUEST</span><span class="method-pill">POST</span>
+                            </div>
+                            <code>https://forgehttp.onrender.com/api/calculate</code>
+                            <pre id="request-json">{
+  "left": 24,
+  "operator": "+",
+  "right": 6
+}</pre>
+                        </div>
+
+                        <div class="response-preview">
+                            <div class="preview-heading">
+                                <span>RESPONSE</span><span class="response-code" id="response-code">WAITING</span>
+                            </div>
+                            <pre id="response-json">{
+  "result": "..."
+}</pre>
+                        </div>
+                    </aside>
+                </section>
+
+                <section class="how-section">
+                    <div class="section-title">
+                        <span class="eyebrow">THE REQUEST JOURNEY</span>
+                        <h2>A tiny app. A real server round trip.</h2>
+                    </div>
+                    <div class="steps">
+                        <article>
+                            <span>01</span>
+                            <h3>Enter values</h3>
+                            <p>The page builds a JSON request from your inputs.</p>
+                        </article>
+                        <article>
+                            <span>02</span>
+                            <h3>Send to ForgeHTTP</h3>
+                            <p>The server parses the HTTP request and routes the API call.</p>
+                        </article>
+                        <article>
+                            <span>03</span>
+                            <h3>Render the response</h3>
+                            <p>The page displays the result returned by the C++ endpoint.</p>
+                        </article>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="footer">
+                <span>GREENLINE <span class="brand-period">×</span> FORGEHTTP</span>
+                <span>AN API INTEGRATION DEMO</span>
+                <a href="https://github.com/Motheo-365/ForgeHTTP" target="_blank" rel="noreferrer">
+                    ForgeHTTP source <span aria-hidden="true">↗</span>
+                </a>
+            </footer>
+        </div>
+    </body>
+</html>

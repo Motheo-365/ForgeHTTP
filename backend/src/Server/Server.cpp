@@ -1,5 +1,6 @@
 #include "Server/Server.h"
 
+#include "Controllers/CalculatorController.h"
 #include "HTTP/HttpParser.h"
 #include "HTTP/HttpResponse.h"
 #include "HTTP/HttpRequest.h"
@@ -25,13 +26,14 @@ std::string configuredApiToken() {
     return token == nullptr ? "" : token;
 }
 
-bool isPublicReadOnlyApiRequest(const HttpRequest& request) {
-    if (request.getMethod() != HttpMethod::GET) {
-        return false;
+bool isPublicDemoApiRequest(const HttpRequest& request) {
+    const std::string& path = request.getPath();
+    if (request.getMethod() == HttpMethod::GET) {
+        return path == "/api/requests" || path == "/api/config";
     }
 
-    const std::string& path = request.getPath();
-    return path == "/api/requests" || path == "/api/config";
+    return request.getMethod() == HttpMethod::POST &&
+        path == "/api/calculate";
 }
 
     std::string methodName(HttpMethod method) {
@@ -69,6 +71,10 @@ Server::Server()
 
     router.get("/api/requests", [this](const HttpRequest&) {
         return requestHistory.getRequests();
+    });
+
+    router.post("/api/calculate", [](const HttpRequest& request) {
+        return CalculatorController::calculate(request);
     });
 
     router.post("/api/users", [this](const HttpRequest& req) {
@@ -298,7 +304,7 @@ void Server::handleConnection(Connection& c) {
             rateLimiterMiddleware.handle(request, response, [&]() {
                 if (authenticationEnabled.load() &&
                     request.getPath().rfind("/api/", 0) == 0 &&
-                    !isPublicReadOnlyApiRequest(request)) {
+                    !isPublicDemoApiRequest(request)) {
                     authMiddleware.handle(request, response, endpoint);
                 } else {
                     endpoint();
