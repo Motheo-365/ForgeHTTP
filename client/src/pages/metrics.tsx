@@ -1,14 +1,24 @@
+import { useState } from "react";
+
 import { useMetrics } from "../context/metricsContext";
 import StatCard from "../components/statCard";
+import {
+    formatRequestTime,
+    getRollingRequestActivity,
+    filterRequestsByRange,
+    REQUEST_RANGE_OPTIONS,
+    type RequestRange
+} from "../services/time";
 import "../styles/metrics.css";
 
 function Metrics() {
     const {
         metrics,
-        metricsHistory,
+        requestHistory,
         loading,
         error
     } = useMetrics();
+    const [range, setRange] = useState<RequestRange>("24h");
 
     if (loading && !metrics) {
         return (
@@ -30,12 +40,18 @@ function Metrics() {
         );
     }
 
-    const responseTimes = metricsHistory.map(
-        (entry) => entry.average_response_time_ms
+    const chronologicalRequests = [...requestHistory].reverse();
+    const visibleRequests = filterRequestsByRange(
+        chronologicalRequests,
+        range
     );
 
-    const requests = metricsHistory.map(
-        (entry) => entry.requests
+    const responseTimes = visibleRequests.map(
+        (entry) => entry.duration_ms
+    );
+
+    const requests = getRollingRequestActivity(
+        visibleRequests.map((entry) => entry.time)
     );
 
     const maxResponseTime = Math.max(
@@ -81,11 +97,11 @@ function Metrics() {
     );
 
     const formatTime = (index: number): string => {
-        if (!metricsHistory[index]) {
+        if (!visibleRequests[index]) {
             return "";
         }
 
-        return metricsHistory[index].time;
+        return formatRequestTime(visibleRequests[index].time);
     };
 
     return (
@@ -107,6 +123,19 @@ function Metrics() {
                     <span className="metrics-live-dot"></span>
                     LIVE
                 </div>
+
+                <select
+                    value={range}
+                    onChange={(event) =>
+                        setRange(event.target.value as RequestRange)
+                    }
+                >
+                    {REQUEST_RANGE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
             </header>
 
             <section className="metrics-overview">
@@ -135,12 +164,12 @@ function Metrics() {
                         </div>
 
                         <span className="metrics-chart-meta">
-                            {metricsHistory.length} samples
+                            {visibleRequests.length} requests
                         </span>
                     </div>
 
                     <div className="metrics-chart">
-                        {metricsHistory.length < 2 ? (
+                        {visibleRequests.length < 2 ? (
 
                             <div className="metrics-chart-empty">
                                 COLLECTING PERFORMANCE DATA...
@@ -204,7 +233,7 @@ function Metrics() {
                                         <span>
                                             {formatTime(
                                                 Math.floor(
-                                                    (metricsHistory.length - 1) /
+                                                    (visibleRequests.length - 1) /
                                                     2
                                                 )
                                             )}
@@ -212,7 +241,7 @@ function Metrics() {
 
                                         <span>
                                             {formatTime(
-                                                metricsHistory.length - 1
+                                                visibleRequests.length - 1
                                             )}
                                         </span>
 
@@ -246,12 +275,12 @@ function Metrics() {
                         </div>
 
                         <span className="metrics-chart-meta">
-                            {metricsHistory.length} samples
+                            {visibleRequests.length} requests
                         </span>
                     </div>
 
                     <div className="metrics-chart">
-                        {metricsHistory.length < 2 ? (
+                        {visibleRequests.length < 2 ? (
                             <div className="metrics-chart-empty">
                                 COLLECTING REQUEST DATA...
                             </div>
@@ -316,7 +345,7 @@ function Metrics() {
                                         <span>
                                             {formatTime(
                                                 Math.floor(
-                                                    (metricsHistory.length - 1) /
+                                                    (visibleRequests.length - 1) /
                                                     2
                                                 )
                                             )}
@@ -324,7 +353,7 @@ function Metrics() {
 
                                         <span>
                                             {formatTime(
-                                                metricsHistory.length - 1
+                                                visibleRequests.length - 1
                                             )}
                                         </span>
                                     </div>

@@ -6,6 +6,8 @@ import {
     getRequestHistory,
     getConfiguration
 } from "../services/api";
+import { formatRequestTime } from "../services/time";
+import { useMetrics } from "../context/metricsContext";
 
 import "../styles/terminal.css";
 
@@ -17,6 +19,7 @@ function Terminal() {
     ]);
 
     const [command, setCommand] = useState("");
+    const { refreshMetrics } = useMetrics();
     const inputRef = useRef<HTMLInputElement>(null);
     const terminalRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +83,7 @@ function Terminal() {
                         "PROTOCOL    HTTP/1.1",
                         ""
                     ]);
+                    await refreshMetrics();
                     break;
                 }
 
@@ -98,6 +102,7 @@ function Terminal() {
                         `WORKERS              ${data.workers}`,
                         ""
                     ]);
+                    await refreshMetrics();
                     break;
                 }
 
@@ -111,10 +116,11 @@ function Terminal() {
                         "---------------",
                         ...data.slice(0, 10).map(
                             (request) =>
-                                `${request.time}  ${request.method.padEnd(6)} ${request.path}  ${request.status}  ${request.duration_ms} ms`
+                                `${formatRequestTime(request.time)}  ${request.method.padEnd(6)} ${request.path}  ${request.status}  ${request.duration_ms} ms`
                         ),
                         ""
                     ]);
+                    await refreshMetrics();
                     break;
                 }
 
@@ -152,6 +158,7 @@ function Terminal() {
                         `LOGGING                 ${data.loggingEnabled ? "ON" : "OFF"}`,
                         ""
                     ]);
+                    await refreshMetrics();
                     break;
                 }
 

@@ -35,8 +35,10 @@ export async function getHealth(): Promise<HealthResponse> {
     return response.json();
 }
 
-export async function getMetrics(): Promise<Metrics> {
-    const response = await fetch(`${API_URL}/metrics`);
+export async function getMetrics(internal = false): Promise<Metrics> {
+    const response = await fetch(`${API_URL}/metrics`, {
+        headers: internal ? { "X-ForgeHTTP-Internal": "true" } : undefined
+    });
 
     if (!response.ok) {
         throw new Error(`Failed to fetch metrics: ${response.status}`);
@@ -71,7 +73,7 @@ export async function createUser(user: CreateUserRequest): Promise<User> {
     return response.json();
 }
 
-export async function getRequestHistory(): Promise<RequestHistoryEntry[]> {
+export async function getRequestHistory(internal = false): Promise<RequestHistoryEntry[]> {
     const response = await fetch(`${API_URL}/api/requests`, {
         headers: authorizedHeaders()
     });

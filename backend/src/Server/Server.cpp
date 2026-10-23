@@ -245,15 +245,18 @@ void Server::handleConnection(Connection& c) {
         // std::cout << rawRequest << '\n';
 
         HttpRequest request = HttpParser::parse(rawRequest);
-        request.clientAddress = c.peerAddress();
-        requestMethod = methodName(request.getMethod());
-        requestPath = request.getPath();
+        const bool internalRequest =
+            request.getMethod() == HttpMethod::OPTIONS ||
+            request.getHeader("X-ForgeHTTP-Internal") == "true";
 
         events.publish({
             ServerEventType::RequestReceived,
             std::chrono::system_clock::now(),
-            requestMethod,
-            requestPath
+            methodName(request.getMethod()),
+            request.getPath(),
+            0,
+            0.0,
+            internalRequest
         });
         requestTracked = true;
 
@@ -312,7 +315,8 @@ void Server::handleConnection(Connection& c) {
             methodName(request.getMethod()),
             request.getPath(),
             response.getStatusCode(),
-            elapsed
+            elapsed,
+            internalRequest
         });
     }
 

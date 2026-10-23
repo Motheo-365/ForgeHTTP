@@ -2,9 +2,17 @@
 
 #include <sstream>
 
+namespace {
+
+}
+
 MetricsConnector::MetricsConnector(int workers) : workers(workers) {}
 
 void MetricsConnector::onEvent(const ServerEvent& event) {
+    if (event.internal) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex);
 
     if (event.type == ServerEventType::RequestReceived) {

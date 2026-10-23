@@ -2,63 +2,23 @@ import { useEffect, useRef, useState } from "react";
 
 import Chart from "chart.js/auto";
 
-import * as api from "../services/api";
-
-import type { Metrics } from "../types/api";
+import { useMetrics } from "../context/metricsContext";
+import {
+    formatRequestTime,
+    getRollingRequestActivity,
+    filterRequestsByRange,
+    REQUEST_RANGE_OPTIONS,
+    type RequestRange
+} from "../services/time";
 
 import "../styles/lineGraph.css";
-
-const STORAGE_KEY = "forgehttp_metrics_history";
 
 function LineGraph() {
     const chartRef = useRef<HTMLCanvasElement | null>(null);
     const chartInstance = useRef<Chart | null>(null);
+    const { requestHistory } = useMetrics();
 
-    const [metricsHistory, setMetricsHistory] = useState<Metrics[]>(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-
-        if (!stored) {
-            return [];
-        }
-
-        try {
-            return JSON.parse(stored);
-        } catch {
-            return [];
-        }
-    });
-
-    const [sampleCount, setSampleCount] = useState(20);
-
-    /*
-     * Collect metrics every 5 seconds.
-     */
-    useEffect(() => {
-        async function loadMetrics() {
-            try {
-                const metrics = await api.getMetrics();
-
-                setMetricsHistory((previous) => {
-                    const updated = [...previous, metrics];
-
-                    localStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(updated)
-                    );
-
-                    return updated;
-                });
-            } catch {
-                // Metrics unavailable.
-            }
-        }
-
-        loadMetrics();
-
-        const interval = setInterval(loadMetrics, 5000);
-
-        return () => clearInterval(interval);
-    }, []);
+    const [range, setRange] = useState<RequestRange>("24h");
 
     /*
      * Create Chart.js once.
@@ -75,7 +35,7 @@ function LineGraph() {
                 labels: [],
                 datasets: [
                     {
-                        label: "Requests",
+                        label: "Requests per minute",
                         data: [],
 
                         borderWidth: 2,
@@ -99,12 +59,25 @@ function LineGraph() {
                     legend: {
                         display: true,
                     },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                return items[0]?.label ?? "";
+                            },
+                            label: (item) => {
+                                return `${item.raw} requests in the last minute`;
+                            },
+                        },
+                    },
                 },
 
                 scales: {
                     x: {
                         ticks: {
+                            autoSkip: true,
                             maxTicksLimit: 8,
+                            maxRotation: 45,
+                            minRotation: 45,
                         },
 
                         grid: {
@@ -137,17 +110,21 @@ function LineGraph() {
             return;
         }
 
-        const samples = metricsHistory.slice(-sampleCount);
+        const samples = filterRequestsByRange(requestHistory, range)
+            .reverse();
 
-        chartInstance.current.data.labels = samples.map((_, index) => {
-            return `${(index + 1) * 5}s`;
-        });
+        const activity = getRollingRequestActivity(
+            samples.map((request) => request.time)
+        );
 
-        chartInstance.current.data.datasets[0].data =
-            samples.map((metrics) => metrics.requests);
+        chartInstance.current.data.labels = samples.map(
+            (request) => formatRequestTime(request.time)
+        );
+
+        chartInstance.current.data.datasets[0].data = activity;
 
         chartInstance.current.update("none");
-    }, [metricsHistory, sampleCount]);
+    }, [requestHistory, range]);
 
     return (
         <div className="line-graph">
@@ -161,22 +138,16 @@ function LineGraph() {
                 </div>
 
                 <select
-                    value={sampleCount}
+                    value={range}
                     onChange={(event) =>
-                        setSampleCount(Number(event.target.value))
+                        setRange(event.target.value as RequestRange)
                     }
                 >
-                    <option value={20}>
-                        Last 20 samples
-                    </option>
-
-                    <option value={50}>
-                        Last 50 samples
-                    </option>
-
-                    <option value={100}>
-                        Last 100 samples
-                    </option>
+                    {REQUEST_RANGE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </select>
             </div>
 

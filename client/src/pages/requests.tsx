@@ -1,5 +1,6 @@
 import { useMetrics } from "../context/metricsContext";
 import StatCard from "../components/statCard";
+import { formatRequestTime } from "../services/time";
 
 import "../styles/requests.css";
 
@@ -86,7 +87,7 @@ function Requests() {
                                     (request, index) => (
                                         <tr key={index}>
                                             <td>
-                                                {request.time}
+                                                {formatRequestTime(request.time)}
                                             </td>
 
                                             <td>

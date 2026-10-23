@@ -20,7 +20,7 @@ function Health() {
         setLoading(true);
 
         try {
-            const data = await getHealth();
+            const data = await getHealth(true);
 
             setHealth(data);
             setLastChecked(new Date());
@@ -34,10 +34,6 @@ function Health() {
 
     useEffect(() => {
         checkHealth();
-
-        const interval = setInterval(checkHealth, 5000);
-
-        return () => clearInterval(interval);
     }, []);
 
     const serverHealthy =

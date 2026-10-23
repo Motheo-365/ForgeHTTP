@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMetrics } from "../context/metricsContext";
+import { formatRequestTime } from "../services/time";
 
 import "../styles/requestTable.css";
 
@@ -55,7 +56,7 @@ function RequestTable() {
                             {recentRequests.map((request, index) => (
                                 <tr key={index}>
                                     <td>
-                                        {request.time}
+                                        {formatRequestTime(request.time)}
                                     </td>
 
                                     <td>
