@@ -11,6 +11,7 @@ function Sidebar() {
     const [message, setMessage] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [signedIn, setSignedIn] = useState(api.hasApiToken());
+    const [tokenVisible, setTokenVisible] = useState(false);
     const tokenInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -132,20 +133,31 @@ function Sidebar() {
                         ) : (
                             <form onSubmit={signIn}>
                                 <label htmlFor="admin-token">ADMIN TOKEN</label>
-                                <input
-                                    ref={tokenInputRef}
-                                    id="admin-token"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    spellCheck={false}
-                                    value={token}
-                                    onChange={(event) => {
-                                        setToken(event.target.value);
-                                        setMessage("");
-                                    }}
-                                    placeholder="Enter admin token"
-                                    required
-                                />
+                                <div className="admin-token-input">
+                                    <input
+                                        ref={tokenInputRef}
+                                        id="admin-token"
+                                        type={tokenVisible ? "text" : "password"}
+                                        autoComplete="current-password"
+                                        spellCheck={false}
+                                        value={token}
+                                        onChange={(event) => {
+                                            setToken(event.target.value);
+                                            setMessage("");
+                                        }}
+                                        placeholder="Enter admin token"
+                                        required
+                                    />
+                                    <button
+                                        className="admin-token-visibility"
+                                        type="button"
+                                        aria-label={tokenVisible ? "Hide token" : "Show token"}
+                                        aria-pressed={tokenVisible}
+                                        onClick={() => setTokenVisible((visible) => !visible)}
+                                    >
+                                        {tokenVisible ? "HIDE" : "SHOW"}
+                                    </button>
+                                </div>
                                 <p className="admin-modal-description">
                                     The token is verified by the server and kept only
                                     for this browser tab.
